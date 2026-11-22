@@ -263,6 +263,7 @@ Item {
     }
 
     MultiEffect {
+      id: wallpaperBlur
       anchors.fill: wallpaper
       source: wallpaper
       autoPaddingEnabled: false
@@ -291,6 +292,7 @@ Item {
     Aura {
       id: aura
       anchors.fill: parent
+      backdrop: wallpaperBlur
       style: root.auraStyle
       intensity: root.auraIntensity
       cardX: mediaCard.x

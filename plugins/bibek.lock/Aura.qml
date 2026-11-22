@@ -8,8 +8,8 @@ import qs.Commons
 // Fills the whole lock view; styles position themselves around the media card
 // (cardX/cardY/cardWidth/cardHeight, in this item's coordinates).
 //
-// Styles: "horizon" (light band along the bottom), "halo" (rotating ring around
-// the card), "spectrum" (soft light columns per frequency band), "cloud"
+// Styles: "horizon" (light band along the bottom), "halo" (soft glow around
+// the card, like the music menu), "spectrum" (soft light columns per frequency band), "cloud"
 // (one swirling colour mass) and "orbs" (separate soft lights).
 //
 // `level` is bass energy 0..1, `high` mid/treble energy, `bands` six bands from
@@ -27,6 +27,8 @@ Item {
   property real level: -1
   property real high: 0
   property var bands: []
+  // What sits behind the aura (the blurred wallpaper), for the halo's glass.
+  property Item backdrop: null
 
   property real cardX: 0
   property real cardY: 0
@@ -168,63 +170,129 @@ Item {
     }
   }
 
-  // ── Halo: a ring of light hugging the card, colours rotating around it ──
+  // ── Halo: a copy of the music menu's glow, glass included ──
+  // In the bar menu Hyprland's glassy blur (ignore_alpha 0.3) frosts whatever
+  // lies behind the glow wherever it is more than 30% opaque, which draws a
+  // sharp-edged acrylic rim that grows and shrinks with the bass. The lock
+  // screen gets no compositor blur, so the same is done here: the backdrop,
+  // darkened and saturated like Hyprland's glass (brightness 0.75, vibrancy
+  // 0.35), shows only where the glow passes 0.3; the glow is drawn on top.
   Component {
     id: haloStyle
 
+    // The Loader stretches its item over the view; the glow sits inside.
     Item {
-      id: halo
-      readonly property int pad: 90
-      x: aura.cardX - pad
-      y: aura.cardY - pad
-      width: aura.cardWidth + pad * 2
-      height: aura.cardHeight + pad * 2
-      scale: 1 + 0.08 * aura.energy
-      opacity: Math.min(1, (0.65 + 0.35 * aura.energy + 0.2 * aura.sparkle) * aura.k)
-      layer.enabled: true
-      layer.effect: MultiEffect {
-        blurEnabled: true
-        blur: 1.0
-        blurMax: 48
-        saturation: 0.25
-        autoPaddingEnabled: true
-      }
+      id: haloRoot
+      readonly property int spread: Style.space(10)
+      readonly property int pad: spread + 48
+      readonly property real glowOpacity: Math.min(1, (aura.playing && aura.motion && !aura.synthetic ? 0.22 + 0.43 * aura.audioEnergy : 0.45) * aura.k)
 
-      Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-
-        ShapePath {
-          strokeWidth: -1
-          strokeColor: "transparent"
-          fillRule: ShapePath.OddEvenFill
-          fillGradient: ConicalGradient {
-            centerX: halo.width / 2
-            centerY: halo.height / 2
-            angle: aura.spin
+      component Glow: Item {
+        Rectangle {
+          x: haloRoot.pad - haloRoot.spread
+          y: haloRoot.pad - haloRoot.spread
+          width: aura.cardWidth + haloRoot.spread * 2
+          height: aura.cardHeight + haloRoot.spread * 2
+          radius: Style.cornerRadius + haloRoot.spread
+          opacity: haloRoot.glowOpacity
+          Behavior on opacity { NumberAnimation { duration: 90 } }
+          gradient: Gradient {
+            orientation: Gradient.Horizontal
             GradientStop { position: 0.0; color: aura.c0 }
-            GradientStop { position: 0.25; color: aura.c1 }
-            GradientStop { position: 0.5; color: aura.c2 }
-            GradientStop { position: 0.75; color: aura.c3 }
-            GradientStop { position: 1.0; color: aura.c0 }
+            GradientStop { position: 0.5; color: aura.c1 }
+            GradientStop { position: 1.0; color: aura.c2 }
           }
-
-          // Ring: outer rounded rect minus the area just inside the card edge.
-          PathRectangle {
-            x: halo.pad - 26
-            y: halo.pad - 26
-            width: aura.cardWidth + 52
-            height: aura.cardHeight + 52
-            radius: Style.cornerRadius + 26
-          }
-          PathRectangle {
-            x: halo.pad + 10
-            y: halo.pad + 10
-            width: aura.cardWidth - 20
-            height: aura.cardHeight - 20
-            radius: Math.max(0, Style.cornerRadius - 10)
+          layer.enabled: true
+          layer.effect: MultiEffect {
+            blurEnabled: true
+            blur: 1.0
+            blurMax: 32
+            autoPaddingEnabled: true
           }
         }
+      }
+
+      Item {
+        id: region
+        x: aura.cardX - haloRoot.pad
+        y: aura.cardY - haloRoot.pad
+        width: aura.cardWidth + haloRoot.pad * 2
+        height: aura.cardHeight + haloRoot.pad * 2
+
+        // The glow's alpha, used as the glass mask.
+        Glow {
+          id: glassMask
+          anchors.fill: parent
+          visible: false
+          layer.enabled: true
+        }
+
+        // Glass: the backdrop behind the glow, frosted like Hyprland's.
+        Item {
+          anchors.fill: parent
+          visible: aura.backdrop !== null
+          layer.enabled: true
+          layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: glassMask
+            maskThresholdMin: 0.3
+            maskSpreadAtMin: 0.08
+          }
+          ShaderEffectSource {
+            id: behind
+            anchors.fill: parent
+            sourceItem: aura.backdrop
+            sourceRect: Qt.rect(region.x, region.y, region.width, region.height)
+            live: true
+            visible: false
+          }
+          MultiEffect {
+            anchors.fill: parent
+            source: behind
+            autoPaddingEnabled: false
+            blurEnabled: true
+            blur: 0.3
+            blurMax: 16
+            saturation: 0.35
+          }
+          // The lock's own shade over the wallpaper, then the glass's 0.75.
+          Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, 0.35) }
+          Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, 0.25) }
+        }
+
+        // The glow itself, over the glass.
+        Glow { anchors.fill: parent }
+      }
+
+      // Screen edges: the same light frame the windows get while music plays,
+      // here on all four walls of the lock screen, beating with the bass.
+      Item {
+        id: edges
+        anchors.fill: parent
+        readonly property int wall: Style.space(20)
+        opacity: Math.min(1, (aura.playing && aura.motion && !aura.synthetic ? 0.3 + 0.7 * aura.audioEnergy : 0.6) * aura.k)
+        Behavior on opacity { NumberAnimation { duration: 90 } }
+        layer.enabled: true
+        layer.effect: MultiEffect {
+          blurEnabled: true
+          blur: 1.0
+          blurMax: 32
+          autoPaddingEnabled: false
+        }
+
+        component Wall: Rectangle {
+          property bool across: true
+          gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0; color: aura.c0 }
+            GradientStop { position: 0.5; color: aura.c1 }
+            GradientStop { position: 1.0; color: aura.c2 }
+          }
+        }
+        Wall { x: 0; y: -edges.wall / 2; width: parent.width; height: edges.wall }
+        Wall { x: 0; y: parent.height - edges.wall / 2; width: parent.width; height: edges.wall }
+        Rectangle { x: -edges.wall / 2; y: 0; width: edges.wall; height: parent.height; color: aura.c0 }
+        Rectangle { x: parent.width - edges.wall / 2; y: 0; width: edges.wall; height: parent.height; color: aura.c2 }
       }
     }
   }

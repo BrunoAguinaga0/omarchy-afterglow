@@ -159,34 +159,35 @@ Item {
     onClicked: { card.interacted(); card.bodyClicked() }
   }
 
-  Row {
-    x: card.padding
-    y: card.padding
-    width: card.width - card.padding * 2
-    height: card.artSize
-    spacing: 16
+  // Cover bleeds: it takes the card's full height against its left edge, with
+  // the card's own corners there, and fades into the card towards the text.
+  readonly property int bleedSize: card.height
 
-    // Cover art with drop shadow.
+  Row {
+    x: 0
+    y: 0
+    width: card.width - card.padding
+    height: card.height
+    spacing: 10
+
     Item {
       id: artFrame
-      width: card.artSize
-      height: card.artSize
-      layer.enabled: true
-      layer.effect: MultiEffect {
-        shadowEnabled: true
-        shadowColor: "#000000"
-        shadowOpacity: 0.45
-        shadowBlur: 0.8
-        shadowVerticalOffset: 4
-        autoPaddingEnabled: true
-      }
+      width: card.bleedSize
+      height: card.bleedSize
 
+      // Card-shaped on the left; fades out over the right third.
       Rectangle {
         id: artMask
         anchors.fill: parent
         radius: Style.cornerRadius
         visible: false
         layer.enabled: true
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: "#ffffffff" }
+          GradientStop { position: 0.6; color: "#ffffffff" }
+          GradientStop { position: 1.0; color: "#00ffffff" }
+        }
       }
 
       Item {
@@ -220,8 +221,8 @@ Item {
           source: card.artUrl
           fillMode: Image.PreserveAspectCrop
           asynchronous: true
-          sourceSize.width: card.artSize * 2
-          sourceSize.height: card.artSize * 2
+          sourceSize.width: card.bleedSize * 2
+          sourceSize.height: card.bleedSize * 2
           visible: card.hasArt
         }
       }
@@ -229,7 +230,7 @@ Item {
 
     Column {
       id: info
-      width: parent.width - card.artSize - parent.spacing
+      width: parent.width - card.bleedSize - parent.spacing
       anchors.verticalCenter: parent.verticalCenter
       spacing: 4
 

@@ -102,10 +102,18 @@ Panel {
     command: ["omarchy-shell", "notifications", "isDnd"]
     stdout: StdioCollector { waitForEnd: true; onStreamFinished: root.dnd = String(text).trim() === "on" }
   }
+  // Music lights (frame around the windows and the pill's halo), owned by bruno.music.
+  property bool musicLights: true
+  Process {
+    id: lightsProc
+    command: ["omarchy-shell", "bruno.lights", "status"]
+    stdout: StdioCollector { waitForEnd: true; onStreamFinished: root.musicLights = String(text).trim() !== "off" }
+  }
   Process { id: actionProc; onExited: root.refreshToggles() }
   function refreshToggles() {
     if (!nightProc.running) nightProc.running = true
     if (!dndProc.running) dndProc.running = true
+    if (!lightsProc.running) lightsProc.running = true
   }
   function run(cmd) {
     if (actionProc.running) return
@@ -253,6 +261,13 @@ Panel {
             icon: root.glyph(root.micMuted ? 0xf036d : 0xf036c)
             active: !root.micMuted
             onClicked: if (root.source && root.source.audio) root.source.audio.muted = !root.source.audio.muted
+          }
+          Tile {
+            title: "Luces de música"
+            subtitle: root.musicLights ? "Encendidas" : "Apagadas"
+            icon: root.glyph(root.musicLights ? 0xf075a : 0xf075b)
+            active: root.musicLights
+            onClicked: root.run(["omarchy-shell", "bruno.lights", "toggle"])
           }
         }
 

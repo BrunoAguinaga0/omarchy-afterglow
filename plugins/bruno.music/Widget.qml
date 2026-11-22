@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Mpris
 import Quickshell.Wayland
@@ -78,9 +79,10 @@ Panel {
   // Aura in the cover's colors behind the pill, like the "now playing" notice.
   Rectangle {
     id: pillAura
+    visible: root.lightsOn
     anchors.centerIn: pill
     width: pill.width + Style.space(16)
-    height: pill.height + Style.space(6)
+    height: pill.height + Style.space(11)
     radius: height / 2
     // Follows the music's bass; steady when there is no audio feed.
     opacity: root.audioLevel < 0 ? 0.75 : 0.35 + 0.65 * root.audioLevel
@@ -258,10 +260,36 @@ Panel {
   function previous() { if (player && player.canGoPrevious) { quietAnnounce(); player.previous() } }
   function next() { if (player && player.canGoNext) { quietAnnounce(); player.next() } }
 
+  // ── "Luces de música" switch ──
+  // Turns off the light frame around the windows and the pill's beating halo
+  // (cava stops too). Saved in a state file so it survives restarts; the
+  // control center toggles it with: omarchy-shell bruno.lights toggle
+  property bool lightsOn: true
+  FileView {
+    id: lightsFile
+    path: Quickshell.env("HOME") + "/.local/state/omarchy/bruno-music-lights"
+    watchChanges: true
+    printErrors: false
+    onFileChanged: reload()
+    onLoaded: root.lightsOn = String(text()).trim() !== "off"
+    onLoadFailed: root.lightsOn = true
+  }
+  function setLights(on) {
+    root.lightsOn = on
+    lightsFile.setText(on ? "on\n" : "off\n")
+  }
+  IpcHandler {
+    target: "bruno.lights"
+    function status(): string { return root.lightsOn ? "on" : "off" }
+    function toggle(): string { root.setLights(!root.lightsOn); return root.lightsOn ? "on" : "off" }
+    function on(): string { root.setLights(true); return "on" }
+    function off(): string { root.setLights(false); return "off" }
+  }
+
   // Live audio level (0-1) for the auras, from cava while music plays;
   // -1 means no feed. Low bands weigh most, so the glow beats with the bass.
   property real audioLevel: -1
-  readonly property bool audioWanted: playing && !vertical && !Style.reduceMotion
+  readonly property bool audioWanted: playing && !vertical && !Style.reduceMotion && lightsOn
   property int cavaFailures: 0
   onAudioWantedChanged: {
     if (!audioWanted) { audioLevel = -1; cavaFailures = 0 }
@@ -387,6 +415,143 @@ Panel {
         onPreviousRequested: root.previous()
         onPlayPauseRequested: if (root.player) root.player.togglePlaying()
         onNextRequested: root.next()
+      }
+    }
+  }
+
+  // ── Light frame around the open apps ──
+  // While music plays, the tiled windows of the active workspace are taken as
+  // one block, and a glow in the cover's colors frames its four outer walls,
+  // beating with the bass like the pill. It sits under the windows, so it only
+  // shows in the gaps around the block.
+  property rect appsBlock: Qt.rect(0, 0, 0, 0)
+  readonly property bool frameWanted: playing && !vertical && lightsOn
+
+  function refreshBlock() {
+    if (frameWanted && !blockQuery.running) blockQuery.running = true
+  }
+  onFrameWantedChanged: refreshBlock()
+
+  Process {
+    id: blockQuery
+    command: ["sh", "-c", "hyprctl -j activeworkspace; echo '\u001e'; hyprctl -j clients"]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        try {
+          var parts = text.split("\u001e")
+          var ws = JSON.parse(parts[0])
+          var clients = JSON.parse(parts[1])
+          if (ws.hasfullscreen) { root.appsBlock = Qt.rect(0, 0, 0, 0); return }
+          var x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9, n = 0
+          for (var i = 0; i < clients.length; i++) {
+            var c = clients[i]
+            if (!c.mapped || c.hidden || c.floating || c.workspace.id !== ws.id) continue
+            x1 = Math.min(x1, c.at[0]); y1 = Math.min(y1, c.at[1])
+            x2 = Math.max(x2, c.at[0] + c.size[0]); y2 = Math.max(y2, c.at[1] + c.size[1])
+            n++
+          }
+          root.appsBlock = n > 0 ? Qt.rect(x1, y1, x2 - x1, y2 - y1) : Qt.rect(0, 0, 0, 0)
+        } catch (e) {
+          root.appsBlock = Qt.rect(0, 0, 0, 0)
+        }
+      }
+    }
+  }
+
+  Connections {
+    target: Hyprland
+    function onRawEvent(event) {
+      var n = event.name
+      if (n === "openwindow" || n === "closewindow" || n === "movewindow" || n === "movewindowv2"
+          || n === "workspace" || n === "workspacev2" || n === "fullscreen" || n === "changefloatingmode"
+          || n === "focusedmon" || n === "activewindowv2")
+        blockRefresh.restart()
+    }
+  }
+  // Events arrive before the layout settles; ask a moment later. A slow poll
+  // catches resizes, which Hyprland does not announce.
+  Timer { id: blockRefresh; interval: 160; onTriggered: root.refreshBlock() }
+  Timer { interval: 1500; repeat: true; running: root.frameWanted; onTriggered: root.refreshBlock() }
+
+  PanelWindow {
+    id: frameLayer
+    readonly property bool on: root.frameWanted && root.appsBlock.width > 0
+    property real shown: on ? 1 : 0
+    Behavior on shown { NumberAnimation { duration: 600; easing.type: Easing.InOutQuad } }
+
+    visible: shown > 0.01
+    color: "transparent"
+    anchors { top: true; bottom: true; left: true; right: true }
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.namespace: "bruno-music-frame"
+    WlrLayershell.layer: WlrLayer.Bottom
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    mask: Region {}
+
+    // Cached blur: it is redrawn only when the block or the colors change;
+    // the beat only moves the opacity.
+    Item {
+      id: frameGlow
+      readonly property int ring: Style.space(10)
+      x: root.appsBlock.x - ring
+      y: root.appsBlock.y - ring
+      width: root.appsBlock.width + ring * 2
+      height: root.appsBlock.height + ring * 2
+      Behavior on x { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+      Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+      Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+      Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+      opacity: frameLayer.shown * (root.audioLevel < 0 ? 0.7 : 0.3 + 0.7 * root.audioLevel)
+      Behavior on opacity { NumberAnimation { duration: 90 } }
+      layer.enabled: true
+      layer.effect: MultiEffect {
+        blurEnabled: true
+        blur: 1.0
+        blurMax: 32
+        autoPaddingEnabled: true
+      }
+
+      // Four walls drawn separately so the top one can stay faint: the
+      // pill keeps the spotlight up there. The blur rounds the corners.
+      readonly property int wall: ring * 2
+      Rectangle {
+        x: 0; y: 0; width: parent.width; height: frameGlow.wall
+        radius: height / 2
+        opacity: 0.3
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: root.tones[0] }
+          GradientStop { position: 0.5; color: root.tones[1] }
+          GradientStop { position: 1.0; color: root.tones[2] }
+        }
+      }
+      Rectangle {
+        x: 0; y: parent.height - height; width: parent.width; height: frameGlow.wall
+        radius: height / 2
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: root.tones[0] }
+          GradientStop { position: 0.5; color: root.tones[1] }
+          GradientStop { position: 1.0; color: root.tones[2] }
+        }
+      }
+      Rectangle {
+        x: 0; y: frameGlow.wall / 2; width: frameGlow.wall; height: parent.height - frameGlow.wall
+        radius: width / 2
+        gradient: Gradient {
+          GradientStop { position: 0.0; color: Util.alpha(root.tones[0], 0.4) }
+          GradientStop { position: 0.35; color: root.tones[0] }
+          GradientStop { position: 1.0; color: root.tones[0] }
+        }
+      }
+      Rectangle {
+        x: parent.width - width; y: frameGlow.wall / 2; width: frameGlow.wall; height: parent.height - frameGlow.wall
+        radius: width / 2
+        gradient: Gradient {
+          GradientStop { position: 0.0; color: Util.alpha(root.tones[2], 0.4) }
+          GradientStop { position: 0.35; color: root.tones[2] }
+          GradientStop { position: 1.0; color: root.tones[2] }
+        }
       }
     }
   }

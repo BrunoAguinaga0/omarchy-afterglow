@@ -118,14 +118,14 @@ Item {
       blurEnabled: true
       blur: 1.0
       blurMax: 64
-      saturation: 0.25
+      saturation: 0.9
     }
 
     // Theme-coloured veil keeps text legible on any cover.
     Rectangle {
       anchors.fill: parent
       visible: card.hasArt
-      color: Util.alpha(Color.lock.background, 0.72)
+      color: Util.alpha(Color.lock.background, 0.5)
     }
 
     // Soft accent glow from the left edge.
@@ -133,9 +133,9 @@ Item {
       anchors.fill: parent
       gradient: Gradient {
         orientation: Gradient.Horizontal
-        GradientStop { position: 0.0; color: Util.alpha(card.coverPalette[0], 0.22) }
-        GradientStop { position: 0.5; color: Util.alpha(card.coverPalette[0], 0.0) }
-        GradientStop { position: 1.0; color: Util.alpha(card.coverPalette[1], 0.16) }
+        GradientStop { position: 0.0; color: Util.alpha(card.coverPalette[0], 0.4) }
+        GradientStop { position: 0.5; color: Util.alpha(card.coverPalette[2], 0.12) }
+        GradientStop { position: 1.0; color: Util.alpha(card.coverPalette[1], 0.34) }
       }
     }
   }
@@ -154,34 +154,35 @@ Item {
     onClicked: card.interacted()
   }
 
-  Row {
-    x: card.padding
-    y: card.padding
-    width: card.width - card.padding * 2
-    height: card.artSize
-    spacing: 16
+  // Cover bleeds: it takes the card's full height against its left edge, with
+  // the card's own corners there, and fades into the card towards the text.
+  readonly property int bleedSize: card.height
 
-    // Cover art with drop shadow.
+  Row {
+    x: 0
+    y: 0
+    width: card.width - card.padding
+    height: card.height
+    spacing: 10
+
     Item {
       id: artFrame
-      width: card.artSize
-      height: card.artSize
-      layer.enabled: true
-      layer.effect: MultiEffect {
-        shadowEnabled: true
-        shadowColor: "#000000"
-        shadowOpacity: 0.45
-        shadowBlur: 0.8
-        shadowVerticalOffset: 4
-        autoPaddingEnabled: true
-      }
+      width: card.bleedSize
+      height: card.bleedSize
 
+      // Card-shaped on the left; fades out over the right third.
       Rectangle {
         id: artMask
         anchors.fill: parent
         radius: Style.cornerRadius
         visible: false
         layer.enabled: true
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: "#ffffffff" }
+          GradientStop { position: 0.6; color: "#ffffffff" }
+          GradientStop { position: 1.0; color: "#00ffffff" }
+        }
       }
 
       Item {
@@ -215,8 +216,8 @@ Item {
           source: card.artUrl
           fillMode: Image.PreserveAspectCrop
           asynchronous: true
-          sourceSize.width: card.artSize * 2
-          sourceSize.height: card.artSize * 2
+          sourceSize.width: card.bleedSize * 2
+          sourceSize.height: card.bleedSize * 2
           visible: card.hasArt
         }
       }
@@ -224,7 +225,7 @@ Item {
 
     Column {
       id: info
-      width: parent.width - card.artSize - parent.spacing
+      width: parent.width - card.bleedSize - parent.spacing
       anchors.verticalCenter: parent.verticalCenter
       spacing: 4
 
