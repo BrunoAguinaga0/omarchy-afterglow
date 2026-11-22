@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Omarchy en islas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: una columna de "islas" como la barra: cada parte del sistema es una isla con su captura, qué cambia y qué archivos la forman. */
+  :root {
+    --bg: #181414;          /* darker_background de Ristretto */
+    --island: #211b1b;      /* dark_background */
+    --island-2: #2c2525;    /* background */
+    --line: rgba(230, 217, 219, 0.12);
+    --fg: #e6d9db;
+    --fg-2: #c3b7b8;
+    --muted: #8f8586;
+    --accent: #f38d70;
+    --accent-soft: rgba(243, 141, 112, 0.14);
+    --yellow: #f9cc6c;
+    --green: #adda78;
+    --lilac: #a8a9eb;
+    --mono: "JetBrains Mono", "Adwaita Mono", ui-monospace, monospace;
+    --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --r-island: 18px;
+    color-scheme: dark;
+  }
+  /* Idioma: el contenido existe en los dos idiomas y se muestra uno. */
+  html:not([data-lang="en"]) .en { display: none !important; }
+  html[data-lang="en"] .es { display: none !important; }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 64px;
+    display: grid;
+    gap: 22px;
+  }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  code, .mono { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--island-2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; color: var(--fg-2); }
+  h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; }
+  p { margin: 0; }
+
+  .topbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .topbar .right { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--island); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; font-family: var(--mono); font-size: 13px; color: var(--fg-2);
+  }
+  .pill b { color: var(--accent); font-weight: 500; }
+  .dots { display: inline-flex; gap: 5px; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+
+  .lang { display: inline-flex; padding: 3px; gap: 2px; background: var(--island); border: 1px solid var(--line); border-radius: 999px; }
+  .lang button {
+    font: 500 12.5px var(--mono); color: var(--fg-2); background: transparent; border: 1px solid transparent;
+    border-radius: 999px; padding: 4px 12px; cursor: pointer;
+  }
+  .lang button:hover { color: var(--fg); }
+  .lang button[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); border-color: rgba(243, 141, 112, 0.5); }
+
+  .hero { display: grid; gap: 18px; }
+  .hero h1 { font-family: var(--mono); font-weight: 700; font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.05; letter-spacing: -0.02em; }
+  .hero h1 span { color: var(--accent); }
+  .hero .lead { color: var(--fg-2); font-size: 1.08rem; max-width: 62ch; }
+  .shot { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45); }
+  .hero .shot { border-radius: var(--r-island); }
+
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fact { font-family: var(--mono); font-size: 12.5px; color: var(--fg-2); background: var(--island); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; }
+  .fact b { color: var(--fg); font-weight: 500; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 6px; }
+  .toc a { font-family: var(--mono); font-size: 13px; text-decoration: none; color: var(--fg-2); padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--island); }
+  .toc a:hover { color: var(--accent); border-color: rgba(243, 141, 112, 0.5); background: var(--accent-soft); }
+
+  .island { background: var(--island); border: 1px solid var(--line); border-radius: var(--r-island); padding: clamp(16px, 3vw, 28px); display: grid; gap: 18px; scroll-margin-top: 16px; }
+  .island-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+  .island h2 { font-size: 1.45rem; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .split { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+  .split.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
+  .split > * { min-width: 0; }
+  .stack { display: grid; gap: 12px; }
+  .body { display: grid; gap: 14px; color: var(--fg-2); }
+  .body ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+  .body li::marker { color: var(--accent); }
+  .body strong { color: var(--fg); font-weight: 600; }
+
+  .files { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .files .row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; font-size: 14px; }
+  .files .row .k { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 64px; }
+
+  .tag { font-family: var(--mono); font-size: 11.5px; border-radius: 999px; padding: 2px 10px; border: 1px solid; white-space: nowrap; }
+  .tag.own { color: var(--accent); border-color: rgba(243, 141, 112, 0.45); background: var(--accent-soft); }
+  .tag.clone { color: var(--yellow); border-color: rgba(249, 204, 108, 0.4); background: rgba(249, 204, 108, 0.1); }
+  .tag.third { color: var(--lilac); border-color: rgba(168, 169, 235, 0.4); background: rgba(168, 169, 235, 0.1); }
+  .tag.cfg { color: var(--green); border-color: rgba(173, 218, 120, 0.4); background: rgba(173, 218, 120, 0.1); }
+
+  .bar-anatomy { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .bar-anatomy div { background: var(--island-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 14px; color: var(--fg-2); }
+  .bar-anatomy b { display: block; font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 500; margin-bottom: 2px; }
+  .barshot { overflow-x: auto; border-radius: 12px; border: 1px solid var(--line); }
+  .barshot img { display: block; width: 100%; min-width: 680px; height: auto; }
+
+  .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+  .sw { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--island-2); }
+  .sw i { display: block; height: 44px; }
+  .sw span { display: block; padding: 6px 10px; font-family: var(--mono); font-size: 11.5px; color: var(--fg-2); }
+  .sw span em { font-style: normal; color: var(--muted); display: block; }
+
+  .specs { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .specs th, .specs td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .specs th { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 500; }
+  .specs td:first-child { color: var(--fg); white-space: nowrap; }
+  .specs td { color: var(--fg-2); font-variant-numeric: tabular-nums; }
+  .tablewrap { overflow-x: auto; }
+
+  pre { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.6; color: var(--fg-2); }
+  pre .c { color: var(--muted); }
+
+  .note { font-size: 13.5px; color: var(--muted); }
+  footer { color: var(--muted); font-size: 14px; display: grid; gap: 6px; padding-top: 8px; }
+
+  @media (max-width: 760px) {
+    .split, .split.flip, .pair, .bar-anatomy { grid-template-columns: minmax(0, 1fr); }
+    .split.flip > .shotcol { order: -1; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .toc a, .lang button { transition: background 0.15s, color 0.15s, border-color 0.15s; }
+  }
+</style>
+<script>
+  // Elige el idioma antes de pintar: el guardado, si no el del navegador.
+  (function () {
+    var lang = null;
+    try { lang = localStorage.getItem("lang"); } catch (e) {}
+    if (lang !== "en" && lang !== "es") {
+      lang = /^es\b/i.test(navigator.language || "") ? "es" : "en";
+    }
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.setAttribute("lang", lang);
+  })();
+</script>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="pill"><b>omarchy-config</b><span class="es">diseño visual</span><span class="en">visual design</span></span>
+    <div class="right">
+      <span class="pill">
+        <span class="dots" aria-hidden="true">
+          <i style="background:#fd6883"></i><i style="background:#f38d70"></i><i style="background:#f9cc6c"></i><i style="background:#adda78"></i><i style="background:#85dacc"></i><i style="background:#a8a9eb"></i>
+        </span>
+        Ristretto
+      </span>
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" id="lang-es" data-set-lang="es" aria-pressed="false">ES</button>
+        <button type="button" id="lang-en" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <h1><span class="es">Omarchy <span>en islas</span></span><span class="en">Omarchy <span>in islands</span></span></h1>
+    <p class="lead es">Un diseño para Omarchy con la barra partida en islas de vidrio, un reproductor que toma los colores de la portada, un bloqueo que late con la música, y un menú y unos avisos redibujados. Todo sigue los colores del tema que tengas puesto.</p>
+    <p class="lead en">A design for Omarchy with the bar split into glass islands, a player that takes its colors from the album cover, a lock screen that pulses with the music, and a redrawn menu and on-screen notices. Everything follows the colors of whatever theme you have on.</p>
+    <img class="shot" src="screenshots/desktop.webp" width="1366" height="768"
+      data-alt-es="Escritorio vacío con el fondo de la luna industrial y la barra en tres islas arriba: escritorios a la izquierda, reproductor en el centro y estado a la derecha."
+      data-alt-en="Empty desktop with the industrial moon wallpaper and the bar in three islands at the top: workspaces on the left, player in the middle and status on the right."
+      alt="Escritorio vacío con el fondo de la luna industrial y la barra en tres islas arriba.">
+    <div class="facts">
+      <span class="fact">Omarchy <b>4.5.0</b></span>
+      <span class="fact">Hyprland <b>0.56</b></span>
+      <span class="fact"><b>9</b> <span class="es">plugins del shell</span><span class="en">shell plugins</span></span>
+      <span class="fact"><span class="es">esquinas de</span><span class="en">corners</span> <b>18 px</b></span>
+      <span class="fact"><span class="es">espacios</span><span class="en">gaps</span> <b>4 / 8 px</b></span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Contenido / Contents">
+    <a href="#barra"><span class="es">Barra</span><span class="en">Bar</span></a>
+    <a href="#musica"><span class="es">Reproductor</span><span class="en">Player</span></a>
+    <a href="#control"><span class="es">Centro de control</span><span class="en">Control center</span></a>
+    <a href="#menu"><span class="es">Menú</span><span class="en">Menu</span></a>
+    <a href="#avisos"><span class="es">Avisos</span><span class="en">OSD</span></a>
+    <a href="#bloqueo"><span class="es">Bloqueo</span><span class="en">Lock screen</span></a>
+    <a href="#protector"><span class="es">Protector</span><span class="en">Screensaver</span></a>
+    <a href="#ventanas"><span class="es">Ventanas y terminal</span><span class="en">Windows and terminal</span></a>
+    <a href="#colores"><span class="es">Colores</span><span class="en">Colors</span></a>
+    <a href="#arranque"><span class="es">Arranque y cursor</span><span class="en">Boot and cursor</span></a>
+    <a href="#instalar"><span class="es">Instalar</span><span class="en">Install</span></a>
+  </nav>
+
+  <!-- Barra -->
+  <section class="island" id="barra">
+    <div class="island-head">
+      <h2><span class="es">Barra en islas</span><span class="en">Island bar</span></h2>
+      <span class="eyebrow"><span class="es">arriba · vidrio desenfocado</span><span class="en">top · frosted glass</span></span>
+    </div>
+    <div class="barshot"><img src="screenshots/bar.webp" width="1366" height="48"
+      data-alt-es="La barra completa: menú y escritorios numerados con íconos a la izquierda, pastilla de música en el centro, y a la derecha rendimiento, clima, fecha y estado de red, bluetooth y volumen."
+      data-alt-en="The full bar: menu and numbered workspaces with icons on the left, music pill in the middle, and performance, weather, date and network, bluetooth and volume status on the right."
+      alt="La barra completa."></div>
+    <div class="bar-anatomy">
+      <div><b class="es">izquierda</b><b class="en">left</b><span class="es">Botón del menú y escritorios con una pastilla que se desliza al activo y el ícono de la app abierta en cada uno.</span><span class="en">Menu button and workspaces, with a pill that slides to the active one and the icon of the app open on each.</span></div>
+      <div><b class="es">centro</b><b class="en">center</b><span class="es">Reloj. Cuando suena música se corre a la derecha y el reproductor ocupa toda la isla.</span><span class="en">Clock. When music plays it moves to the right and the player takes over the whole island.</span></div>
+      <div><b class="es">derecha</b><b class="en">right</b><span class="es">Bandeja plegable, rendimiento en un solo ícono, clima, reloj (solo con música) y centro de control.</span><span class="en">Collapsible tray, performance in a single icon, weather, clock (only with music) and control center.</span></div>
+    </div>
+    <div class="files">
+      <div class="row"><span class="k">plugins</span><code>bruno.bar</code><span class="tag clone"><span class="es">copia de</span><span class="en">clone of</span> omarchy.bar</span><code>bruno.workspaces</code><span class="tag clone"><span class="es">copia de</span><span class="en">clone of</span> omarchy.workspaces</span><code>bruno.clock</code><span class="tag clone"><span class="es">copia de</span><span class="en">clone of</span> omarchy.clock</span><code>skyhonnor.performance</code><span class="tag third">SkyHonnor · MIT</span></div>
+      <div class="row"><span class="k">config</span><code>omarchy/shell.json</code><span class="es">orden de la barra; el reloj tiene la opción <code>music</code>: <code>hide</code> en el centro, <code>only</code> a la derecha</span><span class="en">bar layout; the clock has a <code>music</code> option: <code>hide</code> in the middle, <code>only</code> on the right</span></div>
+      <div class="row"><span class="k"><span class="es">vidrio</span><span class="en">glass</span></span><code>toggles/hypr/bar-glassy.lua</code><span class="tag cfg"><span class="es">interruptor de Omarchy</span><span class="en">Omarchy toggle</span></span></div>
+    </div>
+  </section>
+
+  <!-- Reproductor -->
+  <section class="island" id="musica">
+    <div class="island-head">
+      <h2><span class="es">Reproductor en la barra</span><span class="en">Player in the bar</span></h2>
+      <span class="eyebrow">bruno.music · <span class="es">propio</span><span class="en">original</span></span>
+    </div>
+    <div class="split">
+      <div class="stack shotcol">
+        <img class="shot" src="screenshots/music-crop.webp" width="460" height="170"
+          data-alt-es="Menú del reproductor abierto debajo de la barra: portada a la izquierda, título, barra de progreso y botones anterior, pausa y siguiente; el botón de pausa toma el azul de la portada."
+          data-alt-en="Player menu open below the bar: cover on the left, title, progress bar and previous, pause and next buttons; the pause button takes the blue of the cover."
+          alt="Menú del reproductor abierto debajo de la barra.">
+      </div>
+      <div class="body">
+        <p class="es">Una pastilla con la portada, un ecualizador y el título que se desplaza. <strong>Al pasar el mouse</strong> se abre el menú con la portada, el progreso y los controles; un clic abre el reproductor.</p>
+        <p class="en">A pill with the cover, an equalizer and a scrolling title. <strong>Hovering</strong> opens a menu with the cover, progress and controls; clicking opens the player.</p>
+        <ul class="es">
+          <li>Toma los colores de la portada: el halo de la pastilla, el borde del menú y el botón de pausa cambian con cada canción.</li>
+          <li>El halo late con los graves gracias a <code>cava</code>.</li>
+          <li>Las luces se prenden y apagan desde el centro de control (<em>Luces de música</em>).</li>
+          <li>Funciona con cualquier reproductor que hable MPRIS: Spotify, Chromium, mpv.</li>
+        </ul>
+        <ul class="en">
+          <li>It takes its colors from the cover: the pill's glow, the menu border and the pause button change with every song.</li>
+          <li>The glow pulses with the bass, thanks to <code>cava</code>.</li>
+          <li>The lights turn on and off from the control center (<em>Music lights</em>).</li>
+          <li>Works with any player that speaks MPRIS: Spotify, Chromium, mpv.</li>
+        </ul>
+        <div class="files">
+          <div class="row"><span class="k">plugin</span><code>bruno.music</code><span class="tag own"><span class="es">propio</span><span class="en">original</span></span></div>
+          <div class="row"><span class="k"><span class="es">requiere</span><span class="en">needs</span></span><code>cava</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Centro de control -->
+  <section class="island" id="control">
+    <div class="island-head">
+      <h2><span class="es">Centro de control</span><span class="en">Control center</span></h2>
+      <span class="eyebrow">bruno.control · <span class="es">propio</span><span class="en">original</span></span>
+    </div>
+    <div class="split flip">
+      <div class="body">
+        <p class="es">Se abre desde la última isla de la derecha. Botones grandes con el color de acento cuando están encendidos y en gris cuando no.</p>
+        <p class="en">Opens from the last island on the right. Large buttons in the accent color when on, and grey when off.</p>
+        <ul class="es">
+          <li>Red y Bluetooth, con el estado debajo.</li>
+          <li>No molestar y luz nocturna.</li>
+          <li>Micrófono y luces de música.</li>
+          <li>Barras de volumen y micrófono.</li>
+          <li>Accesos a los ajustes de audio y pantalla.</li>
+        </ul>
+        <ul class="en">
+          <li>Network and Bluetooth, with their status underneath.</li>
+          <li>Do not disturb and night light.</li>
+          <li>Microphone and music lights.</li>
+          <li>Volume and microphone sliders.</li>
+          <li>Shortcuts to audio and display settings.</li>
+        </ul>
+        <div class="files">
+          <div class="row"><span class="k">plugin</span><code>bruno.control</code><span class="tag own"><span class="es">propio</span><span class="en">original</span></span></div>
+        </div>
+      </div>
+      <div class="stack shotcol">
+        <img class="shot" src="screenshots/control-crop.webp" width="400" height="372"
+          data-alt-es="Centro de control: seis botones en dos columnas (Red, Bluetooth, No molestar, Luz nocturna, Micrófono, Luces de música), barras de volumen y micrófono al 100 % y accesos a Audio y Pantalla."
+          data-alt-en="Control center: six buttons in two columns (Network, Bluetooth, Do not disturb, Night light, Microphone, Music lights), volume and microphone sliders at 100% and shortcuts to Audio and Display."
+          alt="Centro de control.">
+      </div>
+    </div>
+  </section>
+
+  <!-- Menú -->
+  <section class="island" id="menu">
+    <div class="island-head">
+      <h2><span class="es">Menú de Super + Espacio</span><span class="en">Super + Space menu</span></h2>
+      <span class="eyebrow">bruno.menu · <span class="es">reemplaza a</span><span class="en">replaces</span> omarchy.menu</span>
+    </div>
+    <div class="pair">
+      <img class="shot" src="screenshots/menu.webp" width="1366" height="768"
+        data-alt-es="Menú principal centrado sobre el escritorio desenfocado: buscador con lupa, Aplicaciones resaltado y debajo el resto de las opciones, con separadores y ayuda de teclado al pie."
+        data-alt-en="Main menu centered over the blurred desktop: search field with a magnifier, Applications highlighted and the other entries below, with separators and a keyboard hint at the bottom."
+        alt="Menú principal.">
+      <img class="shot" src="screenshots/menu-system.webp" width="1366" height="768"
+        data-alt-es="Submenú Sistema: Protector de pantalla, Bloquear, Suspender, Cerrar sesión, Reiniciar y Apagar."
+        data-alt-en="System submenu: Screensaver, Lock, Suspend, Log out, Restart and Shut down."
+        alt="Submenú Sistema.">
+    </div>
+    <p class="note es">Las capturas muestran Omarchy en español; el menú sigue el idioma del sistema.</p>
+    <p class="note en">The screenshots show Omarchy in Spanish; the menu follows the system language.</p>
+    <div class="body">
+      <ul class="es">
+        <li>Buscador con lupa y borde de acento; el título del submenú aparece como texto de ayuda (<em>Sistema…</em>).</li>
+        <li>Cada opción con su ícono en un cuadradito; la elegida, con fondo y borde de acento suaves.</li>
+        <li>Separadores entre grupos y una línea de ayuda de teclado al pie: <span class="mono">↑↓ moverse · ↵ abrir · Esc cerrar</span>.</li>
+        <li>Vidrio: fondo al 78 %, borde finito y el escritorio oscurecido detrás.</li>
+        <li>Todos los submenús de Omarchy salen con este diseño, porque pasan por el mismo menú.</li>
+      </ul>
+      <ul class="en">
+        <li>Search field with a magnifier and an accent border; the submenu title shows as placeholder text (<em>System…</em>).</li>
+        <li>Each entry has its icon in a small square; the selected one gets a soft accent fill and border.</li>
+        <li>Separators between groups and a keyboard hint line at the bottom: <span class="mono">↑↓ move · ↵ open · Esc close</span>.</li>
+        <li>Glass: 78% background, a thin border and the desktop dimmed behind it.</li>
+        <li>Every Omarchy submenu gets this design, because they all go through the same menu.</li>
+      </ul>
+      <div class="files">
+        <div class="row"><span class="k">plugin</span><code>bruno.menu</code><span class="tag clone"><span class="es">copia de</span><span class="en">clone of</span> omarchy.menu</span></div>
+        <div class="row"><span class="k"><span class="es">vidrio</span><span class="en">glass</span></span><code>omarchy/shell.toml</code><span class="es">sección <code>[menu]</code>, la reescribe el hook de colores</span><span class="en"><code>[menu]</code> section, rewritten by the color hook</span></div>
+      </div>
+      <p class="note es">El portapapeles, los emojis y el selector de imágenes son paneles aparte: heredan el vidrio pero mantienen la forma original.</p>
+      <p class="note en">The clipboard, emoji picker and image picker are separate panels: they get the glass but keep their original shape.</p>
+    </div>
+  </section>
+
+  <!-- Avisos -->
+  <section class="island" id="avisos">
+    <div class="island-head">
+      <h2><span class="es">Avisos de volumen y brillo</span><span class="en">Volume and brightness OSD</span></h2>
+      <span class="eyebrow">bruno.osd · <span class="es">reemplaza a</span><span class="en">replaces</span> omarchy.osd</span>
+    </div>
+    <div class="split">
+      <div class="stack shotcol">
+        <img class="shot" src="screenshots/osd-crop.webp" width="320" height="90"
+          data-alt-es="Aviso de volumen: una pastilla con el ícono del parlante en un círculo, una barra con degradé rosado y el valor 95 %."
+          data-alt-en="Volume notice: a pill with the speaker icon in a circle, a pink gradient bar and the value 95%."
+          alt="Aviso de volumen.">
+      </div>
+      <div class="body">
+        <p class="es">Una pastilla abajo al centro con el ícono en un círculo, una barra con degradé y el porcentaje.</p>
+        <p class="en">A pill at the bottom center with the icon in a circle, a gradient bar and the percentage.</p>
+        <div class="files">
+          <div class="row"><span class="k">plugin</span><code>bruno.osd</code><span class="tag clone"><span class="es">copia de</span><span class="en">clone of</span> omarchy.osd</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bloqueo -->
+  <section class="island" id="bloqueo">
+    <div class="island-head">
+      <h2><span class="es">Pantalla de bloqueo</span><span class="en">Lock screen</span></h2>
+      <span class="eyebrow">bibek.lock · <span class="es">aura halo</span><span class="en">halo aura</span></span>
+    </div>
+    <img class="shot" src="screenshots/lock.webp" width="1366" height="768"
+      data-alt-es="Pantalla de bloqueo: hora grande, fecha y clima, campo de contraseña con borde de acento, tarjeta de música con portada y controles, y botones Sleep, Shutdown y Restart; un aura amarilla y magenta enmarca la pantalla."
+      data-alt-en="Lock screen: large clock, date and weather, password field with an accent border, music card with cover and controls, and Sleep, Shutdown and Restart buttons; a yellow and magenta aura frames the screen."
+      alt="Pantalla de bloqueo.">
+    <div class="split">
+      <div class="body">
+        <ul class="es">
+          <li>Hora grande, fecha y clima en una línea.</li>
+          <li>Tarjeta de música con la portada, el progreso y los controles, teñida con los colores de la portada.</li>
+          <li><strong>Aura</strong> alrededor de la pantalla que late con la música (estilo <code>halo</code>).</li>
+          <li>Aviso "ahora suena".</li>
+        </ul>
+        <ul class="en">
+          <li>Large clock, with date and weather on one line.</li>
+          <li>Music card with the cover, progress and controls, tinted with the cover's colors.</li>
+          <li>An <strong>aura</strong> around the screen that pulses with the music (<code>halo</code> style).</li>
+          <li>"Now playing" notice.</li>
+        </ul>
+      </div>
+      <div class="files">
+        <div class="row"><span class="k">plugin</span><code>bibek.lock</code><span class="tag third">Bibek Bhusal · MIT</span></div>
+        <div class="row"><span class="k">config</span><code>omarchy/lock.json</code><span class="es">hora <span class="mono">hh:mm AP</span>, aura <code>halo</code>, intensidad 1</span><span class="en">time <span class="mono">hh:mm AP</span>, <code>halo</code> aura, intensity 1</span></div>
+        <div class="row"><span class="k"><span class="es">requiere</span><span class="en">needs</span></span><code>cava</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Protector -->
+  <section class="island" id="protector">
+    <div class="island-head">
+      <h2><span class="es">Protector de pantalla</span><span class="en">Screensaver</span></h2>
+      <span class="eyebrow"><span class="es">reemplaza al de la terminal</span><span class="en">replaces the terminal one</span></span>
+    </div>
+    <div class="split flip">
+      <div class="body">
+        <p class="es">Después de un rato sin usar la compu aparece la portada grande con el aura alrededor, el título, el artista y el progreso. Sin música, muestra un reloj.</p>
+        <p class="en">After a while without input, the cover shows up large with the aura around it, plus title, artist and progress. Without music, it shows a clock.</p>
+        <p class="es">Reemplaza al protector de terminal de Omarchy, que queda apagado.</p>
+        <p class="en">It replaces Omarchy's terminal screensaver, which is turned off.</p>
+        <div class="files">
+          <div class="row"><span class="k">plugin</span><code>bibek.lock</code><span class="tag third">Bibek Bhusal · MIT</span></div>
+          <div class="row"><span class="k"><span class="es">interruptor</span><span class="en">toggle</span></span><code>toggles/screensaver-off</code><span class="tag cfg"><span class="es">interruptor de Omarchy</span><span class="en">Omarchy toggle</span></span></div>
+        </div>
+      </div>
+      <div class="stack shotcol">
+        <img class="shot" src="screenshots/screensaver.webp" width="1366" height="768"
+          data-alt-es="Protector de pantalla: fondo negro con la portada centrada y un resplandor amarillo y magenta, título, artista y barra de progreso; la hora abajo a la derecha."
+          data-alt-en="Screensaver: black background with the cover centered and a yellow and magenta glow, title, artist and progress bar; the time at the bottom right."
+          alt="Protector de pantalla.">
+      </div>
+    </div>
+  </section>
+
+  <!-- Ventanas y terminal -->
+  <section class="island" id="ventanas">
+    <div class="island-head">
+      <h2><span class="es">Ventanas y terminal</span><span class="en">Windows and terminal</span></h2>
+      <span class="eyebrow">Hyprland · foot · starship · fastfetch</span>
+    </div>
+    <img class="shot" src="screenshots/terminal.webp" width="1366" height="768"
+      data-alt-es="Una terminal de vidrio con esquinas redondeadas que muestra fastfetch con un logo cuadrado en coral y rosa, datos del sistema, la paleta del tema Ristretto y el prompt en una píldora."
+      data-alt-en="A glass terminal with rounded corners showing fastfetch with a square coral and pink logo, system info, the Ristretto palette and the prompt in a pill."
+      alt="Terminal con fastfetch.">
+    <div class="tablewrap">
+      <table class="specs">
+        <thead><tr><th><span class="es">Qué</span><span class="en">What</span></th><th><span class="es">Valor</span><span class="en">Value</span></th><th><span class="es">Archivo</span><span class="en">File</span></th></tr></thead>
+        <tbody>
+          <tr><td><span class="es">Esquinas</span><span class="en">Corners</span></td><td><span class="es">18 px, curva circular</span><span class="en">18 px, circular curve</span> (<span class="mono">rounding_power 2</span>)</td><td><code>hypr/hyprland.lua</code> + <code>corners-rounded</code></td></tr>
+          <tr><td><span class="es">Espacios</span><span class="en">Gaps</span></td><td><span class="es">4 px entre ventanas, 8 px al borde</span><span class="en">4 px between windows, 8 px to the edge</span></td><td><code>hypr/looknfeel.lua</code></td></tr>
+          <tr><td><span class="es">Vidrio</span><span class="en">Glass</span></td><td><span class="es">ventanas y paneles del shell desenfocados</span><span class="en">blurred windows and shell panels</span></td><td><code>window-glassy</code></td></tr>
+          <tr><td><span class="es">Ventana inactiva</span><span class="en">Inactive window</span></td><td><span class="es">atenuada al 14 %</span><span class="en">dimmed by 14%</span></td><td><code>hypr/looknfeel.lua</code></td></tr>
+          <tr><td><span class="es">Borde</span><span class="en">Border</span></td><td><span class="es">solo con dos o más ventanas</span><span class="en">only with two or more windows</span></td><td><code>hypr/looknfeel.lua</code></td></tr>
+          <tr><td><span class="es">Animaciones</span><span class="en">Animations</span></td><td><span class="es">ventanas y menú con <span class="mono">popin 92%</span>, escritorios con <span class="mono">slidefade 12%</span>, notificaciones desde la derecha</span><span class="en">windows and menu with <span class="mono">popin 92%</span>, workspaces with <span class="mono">slidefade 12%</span>, notifications from the right</span></td><td><code>hypr/looknfeel.lua</code></td></tr>
+          <tr><td><span class="es">Terminal</span><span class="en">Terminal</span></td><td><span class="es">Adwaita Mono 9 con JetBrains Mono Nerd de respaldo, margen 24 × 20</span><span class="en">Adwaita Mono 9 with JetBrains Mono Nerd as fallback, 24 × 20 padding</span></td><td><code>foot/foot.ini</code></td></tr>
+          <tr><td>Prompt</td><td><span class="es">píldoras con los colores del tema</span><span class="en">pills in the theme's colors</span></td><td><code>starship.toml</code></td></tr>
+          <tr><td>fastfetch</td><td><span class="es">compacto, logo propio, etiquetas en español y la paleta del tema</span><span class="en">compact, custom logo, Spanish labels and the theme palette</span></td><td><code>fastfetch/</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Colores -->
+  <section class="island" id="colores">
+    <div class="island-head">
+      <h2><span class="es">Colores que siguen al tema</span><span class="en">Colors that follow the theme</span></h2>
+      <span class="eyebrow">hook theme-set · bruno-colors</span>
+    </div>
+    <div class="body">
+      <p class="es">Cada vez que cambiás de tema, un hook lee el <code>colors.toml</code> del tema nuevo y recolorea el vidrio del menú y las notificaciones, las píldoras del prompt y fastfetch. Los plugins de la barra toman los colores del shell directamente. Las capturas usan <strong>Ristretto</strong>:</p>
+      <p class="en">Every time you switch themes, a hook reads the new theme's <code>colors.toml</code> and recolors the menu and notification glass, the prompt pills and fastfetch. The bar plugins take their colors from the shell directly. The screenshots use <strong>Ristretto</strong>:</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#2c2525"></i><span><span class="es">fondo</span><span class="en">background</span><em>#2c2525</em></span></div>
+      <div class="sw"><i style="background:#211b1b"></i><span><span class="es">islas</span><span class="en">islands</span><em>#211b1b</em></span></div>
+      <div class="sw"><i style="background:#e6d9db"></i><span><span class="es">texto</span><span class="en">text</span><em>#e6d9db</em></span></div>
+      <div class="sw"><i style="background:#f38d70"></i><span><span class="es">acento</span><span class="en">accent</span><em>#f38d70</em></span></div>
+      <div class="sw"><i style="background:#fd6883"></i><span><span class="es">rojo</span><span class="en">red</span><em>#fd6883</em></span></div>
+      <div class="sw"><i style="background:#f9cc6c"></i><span><span class="es">amarillo</span><span class="en">yellow</span><em>#f9cc6c</em></span></div>
+      <div class="sw"><i style="background:#adda78"></i><span><span class="es">verde</span><span class="en">green</span><em>#adda78</em></span></div>
+      <div class="sw"><i style="background:#a8a9eb"></i><span><span class="es">lila</span><span class="en">lilac</span><em>#a8a9eb</em></span></div>
+    </div>
+    <div class="files">
+      <div class="row"><span class="k">hook</span><code>omarchy/hooks/theme-set.d/bruno-colors</code><span class="tag own"><span class="es">propio</span><span class="en">original</span></span></div>
+    </div>
+  </section>
+
+  <!-- Arranque -->
+  <section class="island" id="arranque">
+    <div class="island-head">
+      <h2><span class="es">Arranque y cursor</span><span class="en">Boot and cursor</span></h2>
+      <span class="eyebrow">plymouth · catppuccin</span>
+    </div>
+    <div class="body">
+      <ul class="es">
+        <li><strong>Pantalla de arranque "bruno"</strong>: el fondo desenfocado, una tarjeta de vidrio y el campo de contraseña redondeado, a tono con el bloqueo.</li>
+        <li><strong>Cursor</strong> Catppuccin Mocha Dark.</li>
+      </ul>
+      <ul class="en">
+        <li><strong>"bruno" boot screen</strong>: blurred wallpaper, a glass card and a rounded password field, matching the lock screen.</li>
+        <li><strong>Cursor</strong>: Catppuccin Mocha Dark.</li>
+      </ul>
+      <div class="files">
+        <div class="row"><span class="k"><span class="es">archivos</span><span class="en">files</span></span><code>omarchy/plymouth/bruno/</code><code>omarchy/plymouth/install.sh</code><span class="es">pide <span class="mono">sudo</span></span><span class="en">needs <span class="mono">sudo</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Instalar -->
+  <section class="island" id="instalar">
+    <div class="island-head">
+      <h2><span class="es">Instalar</span><span class="en">Install</span></h2>
+      <span class="eyebrow">Omarchy 4.5</span>
+    </div>
+    <div class="body">
+      <p class="es">El repo trae una guía paso a paso pensada para que la siga una IA con acceso a tu terminal. Aplica solo lo visual y deja como están tus monitores, atajos, dock y tiempos de bloqueo. Cada archivo que reemplaza queda guardado como <code>.bak</code>.</p>
+      <p class="en">The repo includes a step-by-step guide meant to be followed by an AI assistant with access to your terminal. It applies only the visual parts and leaves your monitors, keybindings, dock and lock timings alone. Every file it replaces is backed up as <code>.bak</code>.</p>
+      <pre class="es"><span class="c"># pedile a tu asistente que siga esta guía:</span>
+https://github.com/BrunoAguinaga0/omarchy-config/blob/main/INSTRUCCIONES-IA.md</pre>
+      <pre class="en"><span class="c"># ask your assistant to follow this guide:</span>
+https://github.com/BrunoAguinaga0/omarchy-config/blob/main/INSTRUCTIONS-AI.md</pre>
+      <p class="es"><strong>Necesitás:</strong> Omarchy 4.5 con Hyprland, <code>cava</code>, las fuentes Adwaita Mono y JetBrains Mono Nerd, y <code>sudo</code> para el arranque y el cursor.</p>
+      <p class="en"><strong>You need:</strong> Omarchy 4.5 with Hyprland, <code>cava</code>, the Adwaita Mono and JetBrains Mono Nerd fonts, and <code>sudo</code> for the boot screen and cursor.</p>
+      <p class="note es">Las copias de los plugins de Omarchy (<code>bruno.bar</code>, <code>bruno.clock</code>, <code>bruno.menu</code>, <code>bruno.osd</code>, <code>bruno.workspaces</code>) salen de la versión 4.5.0. Con una versión mucho más nueva, alguna puede no cargar.</p>
+      <p class="note en">The clones of Omarchy's plugins (<code>bruno.bar</code>, <code>bruno.clock</code>, <code>bruno.menu</code>, <code>bruno.osd</code>, <code>bruno.workspaces</code>) come from version 4.5.0. With a much newer version, some may fail to load.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p class="es">Bloqueo basado en <a href="https://github.com/BibekBhusal0/omarchy-better-lock">omarchy-better-lock</a> de Bibek Bhusal (MIT). Rendimiento: <a href="https://github.com/SkyHonnor/omarchy-performance">omarchy-performance</a> de SkyHonnor (MIT). Fondo y tema Ristretto: Omarchy.</p>
+    <p class="en">Lock screen based on <a href="https://github.com/BibekBhusal0/omarchy-better-lock">omarchy-better-lock</a> by Bibek Bhusal (MIT). Performance: <a href="https://github.com/SkyHonnor/omarchy-performance">omarchy-performance</a> by SkyHonnor (MIT). Wallpaper and Ristretto theme: Omarchy.</p>
+    <p><a href="https://github.com/BrunoAguinaga0/omarchy-config">github.com/BrunoAguinaga0/omarchy-config</a></p>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var titles = { es: "Omarchy en islas", en: "Omarchy in islands" };
+    function apply(lang) {
+      root.setAttribute("data-lang", lang);
+      root.setAttribute("lang", lang);
+      document.title = titles[lang];
+      document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.getAttribute("data-set-lang") === lang));
+      });
+      document.querySelectorAll("img[data-alt-" + lang + "]").forEach(function (img) {
+        img.alt = img.getAttribute("data-alt-" + lang);
+      });
+    }
+    document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var lang = b.getAttribute("data-set-lang");
+        try { localStorage.setItem("lang", lang); } catch (e) {}
+        apply(lang);
+      });
+    });
+    apply(root.getAttribute("data-lang") === "en" ? "en" : "es");
+  })();
+</script>
+</body>
+</html>

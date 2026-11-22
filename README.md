@@ -1,33 +1,102 @@
-# omarchy-config
+# Omarchy in islands
 
-Mis personalizaciones de Omarchy (tema Ristretto).
+*[Leer en español](README.es.md)*
 
-## Qué hay
+A design for [Omarchy](https://omarchy.org) with the bar split into glass islands, a player that takes its colors from the album cover, a lock screen that pulses with the music, and a redrawn menu and on-screen notices. Everything follows the colors of whatever theme you have on (Ristretto in the screenshots).
 
-- `plugins/bibek.lock`: pantalla de bloqueo con tarjeta de música, aura de colores que reacciona a la música (cava), clima, protector de pantalla con la portada y aviso "ahora suena". Basado en [omarchy-better-lock](https://github.com/BibekBhusal0/omarchy-better-lock) (MIT).
-- `plugins/skyhonnor.performance`: [omarchy-performance](https://github.com/SkyHonnor/omarchy-performance) (MIT) con la opción `compact` (un solo ícono).
-- `plugins/bruno.bar`: barra en islas flotantes (clon de `omarchy.bar`).
-- `plugins/bruno.workspaces`: escritorios con pastilla animada e íconos de apps.
-- `plugins/bruno.clock`: reloj que se corre a la derecha cuando suena música (opción `music`: `hide` / `only`).
-- `plugins/bruno.music`: mini reproductor en la barra; ocupa toda la isla del centro y el menú se abre al pasar el mouse.
-- `plugins/bruno.menu`: copia del menú de Super + Espacio con otro aspecto (buscador con lupa, íconos en cuadraditos, separadores, ayuda de teclado). No recibe las actualizaciones del menú original de Omarchy.
-- `plugins/bruno.control`: centro de control (red, sonido, luz nocturna, no molestar), en gris como las demás islas.
-- `plugins/bruno.osd`: avisos de volumen y brillo rediseñados.
-- `config/`: archivos de `~/.config`; la lista está en `files.sh` y la usan `sync.sh` y `restore.sh`.
-  - `omarchy/shell.json`: orden de la barra, idle y plugins activos.
-  - `omarchy/shell.toml`: vidrio y bordes del menú y las notificaciones (colores de Ristretto).
-  - `omarchy/lock.json`: opciones del bloqueo (formato de hora, estilo del aura, protector, aviso).
-  - `hypr/hyprland.lua`: esquinas redondeadas (al final del archivo).
-  - `hypr/looknfeel.lua`: espacios entre ventanas, animaciones, ventana inactiva atenuada y borde solo con dos o más ventanas.
-  - `foot/foot.ini`: margen de la terminal y fuente de respaldo para los símbolos del prompt.
-  - `starship.toml`: prompt en píldoras.
-  - `fastfetch/`: fastfetch compacto con logo propio.
-  - `omarchy/hooks/theme-set.d/bruno-colors`: al cambiar de tema, recolorea el menú, las notificaciones, el prompt y fastfetch con los colores del tema nuevo.
-  - `omarchy/plymouth/`: pantalla de arranque "bruno" (fondo desenfocado, tarjeta de vidrio, contraseña redondeada) e `install.sh`, que la instala junto con el cursor Catppuccin Mocha Dark. Pide sudo; `restore.sh` no lo corre solo. Para volver a la de Omarchy: `omarchy plymouth set by theme ristretto`.
-  - `hypr/hyprland.lua` también abre Spotify en el escritorio 3 y Chromium en el 2, y elige el cursor.
-- `state/`: interruptores de Omarchy, tema y fondo elegidos.
+![Desktop with the island bar](docs/screenshots/desktop.webp)
 
-## Guardar cambios
+Full tour, part by part: [`docs/index.html`](docs/index.html) (download it and open it in a browser; it has an ES / EN switch).
+
+## What it looks like
+
+The screenshots show Omarchy in Spanish; menus and labels follow your system language.
+
+### Island bar
+
+Workspaces with an animated pill and app icons on the left, the clock or the player in the middle, and status on the right.
+
+![Bar](docs/screenshots/bar.webp)
+
+### Player in the bar
+
+Hovering opens a menu with the cover and controls. The glow, border and buttons take the cover's colors and pulse with the music (`cava`).
+
+<img src="docs/screenshots/music-crop.webp" width="460" alt="Player menu">
+
+### Control center
+
+Network, Bluetooth, do not disturb, night light, microphone, music lights, volume and microphone.
+
+<img src="docs/screenshots/control-crop.webp" width="400" alt="Control center">
+
+### Super + Space menu
+
+Search field with a magnifier, icons in small squares, separators and a keyboard hint. Every Omarchy submenu gets this design.
+
+| Main menu | System |
+|---|---|
+| ![Menu](docs/screenshots/menu.webp) | ![System menu](docs/screenshots/menu-system.webp) |
+
+### Volume and brightness notices
+
+<img src="docs/screenshots/osd-crop.webp" width="320" alt="Volume notice">
+
+### Lock screen and screensaver
+
+Music card, an aura around the screen that pulses with the music, weather and a "now playing" notice. The screensaver shows the cover large with the aura, or a clock when nothing is playing.
+
+| Lock screen | Screensaver |
+|---|---|
+| ![Lock screen](docs/screenshots/lock.webp) | ![Screensaver](docs/screenshots/screensaver.webp) |
+
+### Windows and terminal
+
+Frosted glass, 18 px corners, dimmed inactive window, a border only with two or more windows, and smooth animations. `foot` terminal with wide padding, `starship` prompt in pills and a compact `fastfetch` with a custom logo.
+
+![Terminal](docs/screenshots/terminal.webp)
+
+### Also
+
+- **Colors that follow the theme:** when you switch themes, the `bruno-colors` hook recolors the menu, notifications, prompt and fastfetch.
+- Plymouth **boot screen** "bruno" (blurred wallpaper, glass card, rounded password field) and Catppuccin Mocha Dark **cursor**.
+
+## Install
+
+The easiest way is to ask an AI assistant with access to your terminal (Claude Code, for example) to follow [`INSTRUCTIONS-AI.md`](INSTRUCTIONS-AI.md). The guide applies only the visual parts: it leaves your monitors, keybindings, dock and lock timings alone, and keeps a `.bak` copy of everything it replaces. You can also follow it by hand.
+
+**Requirements:** Omarchy 4.5 with Hyprland, `cava`, the Adwaita Mono and JetBrains Mono Nerd fonts, and `sudo` for the boot screen and cursor.
+
+`bruno.bar`, `bruno.clock`, `bruno.menu`, `bruno.osd` and `bruno.workspaces` are modified copies of Omarchy 4.5.0's plugins. With a much newer version, some may fail to load.
+
+## What's in the repo
+
+| Part | Plugin or file | Origin |
+|---|---|---|
+| Island bar | `plugins/bruno.bar` | clone of `omarchy.bar` |
+| Workspaces | `plugins/bruno.workspaces` | clone of `omarchy.workspaces` |
+| Clock that moves aside for music | `plugins/bruno.clock` | clone of `omarchy.clock` |
+| Player | `plugins/bruno.music` | original |
+| Control center | `plugins/bruno.control` | original |
+| Menu | `plugins/bruno.menu` | clone of `omarchy.menu` |
+| Volume and brightness notices | `plugins/bruno.osd` | clone of `omarchy.osd` |
+| Lock screen and screensaver | `plugins/bibek.lock` | [omarchy-better-lock](https://github.com/BibekBhusal0/omarchy-better-lock) by Bibek Bhusal (MIT), with changes |
+| Performance in one icon | `plugins/skyhonnor.performance` | [omarchy-performance](https://github.com/SkyHonnor/omarchy-performance) by SkyHonnor (MIT), `compact` option |
+| Bar layout and active plugins | `config/omarchy/shell.json` | |
+| Menu and notification glass | `config/omarchy/shell.toml` | |
+| Lock screen options | `config/omarchy/lock.json` | |
+| Gaps, animations, dimming, borders | `config/hypr/looknfeel.lua` | |
+| Corners and cursor | end of `config/hypr/hyprland.lua` | |
+| Terminal, prompt, fastfetch | `config/foot/foot.ini`, `config/starship.toml`, `config/fastfetch/` | |
+| Colors that follow the theme | `config/omarchy/hooks/theme-set.d/bruno-colors` | original |
+| Boot screen and cursor | `config/omarchy/plymouth/` | original |
+| Glass, corners, terminal screensaver off | `state/toggles/` | Omarchy toggles |
+
+## For my own computer
+
+`sync.sh` and `restore.sh` keep **my** full setup, personal preferences included. If you want the design, follow [`INSTRUCTIONS-AI.md`](INSTRUCTIONS-AI.md) instead.
+
+Save changes:
 
 ```bash
 ./sync.sh
@@ -35,17 +104,13 @@ git status
 git commit -am "..." && git push
 ```
 
-## Restaurar en otra compu
+Restore on another computer of mine:
 
 ```bash
 gh repo clone BrunoAguinaga0/omarchy-config
 cd omarchy-config
-omarchy pkg add cava      # para que el aura reaccione a la música
+omarchy pkg add cava
 ./restore.sh
 ```
 
-`restore.sh` copia los plugins y la config, los interruptores de Omarchy (`state/toggles`: barra y ventanas de vidrio, esquinas redondeadas, protector de terminal apagado; quedan exactamente como en el repo), aplica el tema y el fondo (`state/theme`, `state/background`), enlaza el plugin de Superwhisper si la app está instalada y reinicia el shell. Todo lo que reemplaza queda antes en `*.bak.<fecha>`.
-
-La ciudad del clima solo se guarda si se eligió a mano; si no, Omarchy la detecta por IP.
-
-Los clones (`bruno.bar`, `bruno.clock`, `bruno.osd`, `bruno.workspaces`) salen de la versión de Omarchy de noviembre 2026; con una versión mucho más nueva puede hacer falta volver a clonar el original y reaplicar los cambios.
+`restore.sh` copies the plugins and config, mirrors Omarchy's toggles exactly as in the repo, applies the theme and wallpaper (`state/theme`, `state/background`), links the Superwhisper plugin if the app is installed and restarts the shell. Everything it replaces is first saved as `*.bak.<timestamp>`. The cursor and boot screen are installed separately with `~/.config/omarchy/plymouth/install.sh` (needs sudo).
