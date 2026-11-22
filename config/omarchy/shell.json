@@ -1,6 +1,6 @@
 {
   "bar": {
-    "background": "opaque",
+    "background": "glassy",
     "id": "bruno.bar",
     "layout": {
       "center": [
@@ -8,8 +8,8 @@
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
           "id": "bruno.clock",
-          "verticalFormat": "HH\n—\nmm",
-          "music": "hide"
+          "music": "hide",
+          "verticalFormat": "HH\n—\nmm"
         },
         {
           "id": "bruno.music"
@@ -30,8 +30,8 @@
           "id": "omarchy.tray"
         },
         {
-          "id": "skyhonnor.performance",
-          "compact": true
+          "compact": true,
+          "id": "skyhonnor.performance"
         },
         {
           "id": "omarchy.keyboard-layout"
@@ -49,8 +49,8 @@
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
           "id": "bruno.clock",
-          "verticalFormat": "HH\n—\nmm",
-          "music": "only"
+          "music": "only",
+          "verticalFormat": "HH\n—\nmm"
         },
         {
           "id": "bruno.control"
