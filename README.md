@@ -15,6 +15,7 @@ Mis personalizaciones de Omarchy (tema Ristretto).
 - `config/omarchy/shell.json`: orden de la barra, idle y plugins activos.
 - `config/omarchy/lock.json`: opciones del bloqueo (formato de hora, estilo del aura, protector, aviso).
 - `config/hypr/hyprland.lua`: esquinas redondeadas (al final del archivo).
+- `state/`: interruptores de Omarchy, tema y fondo elegidos.
 
 ## Guardar cambios
 
@@ -26,7 +27,15 @@ git commit -am "..." && git push
 
 ## Restaurar en otra compu
 
-1. Copiar cada carpeta de `plugins/` a `~/.config/omarchy/plugins/`.
-2. Copiar `config/omarchy/*.json` a `~/.config/omarchy/` y `config/hypr/hyprland.lua` a `~/.config/hypr/`.
-3. `omarchy pkg add cava` (para el aura) y `omarchy toggle screensaver` (apaga el protector de terminal, lo reemplaza el del bloqueo).
-4. `hyprctl reload && omarchy restart shell`.
+```bash
+gh repo clone BrunoAguinaga0/omarchy-config
+cd omarchy-config
+omarchy pkg add cava      # para que el aura reaccione a la música
+./restore.sh
+```
+
+`restore.sh` copia los plugins y la config, los interruptores de Omarchy (`state/toggles`: ventanas de vidrio, sin espacios, esquinas redondeadas, protector de terminal apagado), aplica el tema y el fondo (`state/theme`, `state/background`), enlaza el plugin de Superwhisper si la app está instalada y reinicia el shell. Todo lo que reemplaza queda antes en `*.bak.<fecha>`; no borra nada.
+
+La ciudad del clima solo se guarda si se eligió a mano; si no, Omarchy la detecta por IP.
+
+Los clones (`bruno.bar`, `bruno.clock`, `bruno.osd`, `bruno.workspaces`) salen de la versión de Omarchy de noviembre 2026; con una versión mucho más nueva puede hacer falta volver a clonar el original y reaplicar los cambios.
