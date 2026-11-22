@@ -36,6 +36,12 @@ for f in "${config_files[@]}"; do
   cp "config/$f" "$HOME/.config/$f"
 done
 
+for d in "${config_dirs[@]}"; do
+  backup "$HOME/.config/$d"
+  mkdir -p "$HOME/.config/$d"
+  rsync -a "config/$d/" "$HOME/.config/$d/"
+done
+
 echo "→ Toggles"
 backup "$state/toggles"
 mkdir -p "$state/toggles"
@@ -68,4 +74,5 @@ if ! command -v cava >/dev/null; then
   echo "Falta cava para que el aura reaccione a la música: omarchy pkg add cava"
 fi
 echo
+echo "Para el cursor y la pantalla de arranque (piden sudo): ~/.config/omarchy/plymouth/install.sh"
 echo "Listo. Lo que había antes quedó en archivos *.bak.$stamp."

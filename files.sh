@@ -11,3 +11,9 @@ config_files=(
   fastfetch/config.jsonc
   fastfetch/logo.txt
 )
+
+# Folders kept in this repo, also under ~/.config (mirrored with rsync).
+config_dirs=(
+  omarchy/hooks/theme-set.d   # bruno-colors: recolors menu, prompt and fastfetch on theme change
+  omarchy/plymouth            # "bruno" boot screen and install.sh (cursor + boot screen, needs sudo)
+)

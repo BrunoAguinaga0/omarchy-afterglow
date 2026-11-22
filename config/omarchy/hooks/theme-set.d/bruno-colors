@@ -1,0 +1,165 @@
+#!/bin/bash
+# Recolors bruno's customizations from the active theme's colors.toml, so they
+# follow every theme change: the glass menu and notifications
+# (~/.config/omarchy/shell.toml), the prompt pills (~/.config/starship.toml) and
+# fastfetch (~/.config/fastfetch/config.jsonc).
+# Runs as an Omarchy theme-set hook; also safe to run by hand.
+set -euo pipefail
+
+colors="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme/colors.toml"
+[[ -f $colors ]] || exit 0
+
+python3 -I - "$colors" "$HOME/.config" <<'PY'
+import os, re, sys, tomllib
+
+colors_path, config = sys.argv[1], sys.argv[2]
+with open(colors_path, "rb") as f:
+    c = tomllib.load(f)
+
+def get(*keys, default="#888888"):
+    for k in keys:
+        v = c.get(k)
+        if isinstance(v, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", v):
+            return v.lower()
+    return default
+
+def rgb(h):
+    return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+
+def mix(a, b, t):
+    """t of a over (1 - t) of b."""
+    return "#%02x%02x%02x" % tuple(round(x * t + y * (1 - t)) for x, y in zip(rgb(a), rgb(b)))
+
+def esc(h):
+    return "38;2;%d;%d;%d" % rgb(h)
+
+bg = get("background")
+fg = get("foreground")
+accent = get("accent", "blue")
+red = get("red")
+yellow = get("yellow")
+magenta = get("magenta")
+cyan = get("cyan")
+green = get("green")
+muted = get("muted", "dark_foreground")
+light = c.get("mode") == "light"
+
+def write(path, text):
+    path = os.path.join(config, path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        f.write(text)
+    os.replace(tmp, path)
+
+# ── shell.toml: replace only the marked block ──
+block = f"""# >>> bruno-colors (written by the theme-set hook; edits here are replaced)
+# Menu and notifications in the bar islands' glass; Hyprland blurs behind them.
+[menu]
+background-alpha          = 0.78
+border                    = "{fg}"
+border-alpha              = 0.12
+border-width              = 1
+scrim-alpha               = 0.4
+selected-background       = "{accent}"
+selected-background-alpha = 0.14
+selected-border           = "{accent}"
+selected-border-alpha     = 0.5
+selected-border-width     = 1
+
+[notifications]
+background-alpha = 0.72
+border           = "{fg}"
+border-alpha     = 0.12
+border-width     = 1
+# <<< bruno-colors
+"""
+shell_path = os.path.join(config, "omarchy/shell.toml")
+current = open(shell_path).read() if os.path.exists(shell_path) else ""
+pattern = re.compile(r"# >>> bruno-colors.*?# <<< bruno-colors\n?", re.S)
+if pattern.search(current):
+    current = pattern.sub(lambda m: block, current)
+else:
+    current = current.rstrip("\n") + ("\n\n" if current.strip() else "") + block
+write("omarchy/shell.toml", current)
+
+# ── starship.toml: prompt in pills ──
+dir_bg = mix(accent, bg, 0.40)
+dir_fg = mix(accent, "#000000" if light else "#ffffff", 0.55 if not light else 0.6)
+git_bg = mix(fg, bg, 0.14)
+L, R = "", ""
+write("starship.toml", f"""# Prompt in pills, like the bar islands. Written by the theme-set hook
+# (bruno-colors) from the active theme; edits here are replaced.
+add_newline = true
+command_timeout = 200
+format = "$directory$git_branch$git_status$character"
+
+[character]
+success_symbol = "[ ❯](bold {accent})"
+error_symbol = "[ ✗](bold {red})"
+
+[directory]
+truncation_length = 2
+truncation_symbol = "…/"
+style = "fg:{dir_fg} bg:{dir_bg}"
+read_only_style = "fg:{dir_fg} bg:{dir_bg}"
+format = "[{L}](fg:{dir_bg})[$path]($style)[$read_only]($read_only_style)[{R}](fg:{dir_bg})"
+repo_root_style = "bold fg:{dir_fg} bg:{dir_bg}"
+repo_root_format = "[{L}](fg:{dir_bg})[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style)[{R}](fg:{dir_bg})"
+
+[git_branch]
+style = "fg:{fg} bg:{git_bg}"
+format = " [{L}](fg:{git_bg})[$branch]($style)"
+
+[git_status]
+style = "fg:{fg} bg:{git_bg}"
+format = "[ $all_status$ahead_behind]($style)[{R}](fg:{git_bg})"
+ahead = "⇡${{count}}"
+diverged = "⇕⇡${{ahead_count}}⇣${{behind_count}}"
+behind = "⇣${{count}}"
+conflicted = "="
+up_to_date = "✓"
+untracked = "?"
+modified = "!"
+stashed = ""
+staged = "+"
+renamed = ""
+deleted = "-"
+""")
+
+# ── fastfetch ──
+dots = "".join("\\\\e[%sm●" % esc(h) for h in (accent, red, magenta, cyan, green, yellow))
+write("fastfetch/config.jsonc", f"""// Compact fastfetch: small Omarchy mark, one column, bars for memory and disk,
+// and the theme's colors at the bottom. Written by the theme-set hook
+// (bruno-colors) from the active theme; edits here are replaced.
+{{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {{
+    "type": "file",
+    "source": "~/.config/fastfetch/logo.txt",
+    "color": {{ "1": "{esc(accent)}", "2": "{esc(red)}" }},
+    "padding": {{ "top": 1, "left": 2, "right": 4 }}
+  }},
+  "display": {{
+    "separator": "  ",
+    "color": {{ "keys": "{esc(muted)}", "title": "{esc(accent)}" }},
+    "percent": {{ "type": ["bar", "num"], "color": {{ "green": "{esc(accent)}", "yellow": "{esc(yellow)}", "red": "{esc(red)}" }} }},
+    "bar": {{ "width": 10, "char": {{ "elapsed": "■", "total": "·" }} }}
+  }},
+  "modules": [
+    {{ "type": "title", "format": "{{user-name}}@{{host-name}}" }},
+    {{ "type": "command", "key": "sistema   ", "text": "echo \\"Omarchy $(omarchy-version)\\"" }},
+    {{ "type": "wm", "key": "escritorio", "format": "{{pretty-name}} {{version}}" }},
+    {{ "type": "kernel", "key": "kernel    " }},
+    {{ "type": "cpu", "key": "cpu       ", "format": "{{name}} @ {{freq-max}}" }},
+    {{ "type": "gpu", "key": "gpu       ", "format": "{{name}}" }},
+    {{ "type": "memory", "key": "memoria   " }},
+    {{ "type": "disk", "key": "disco     ", "folders": "/", "format": "{{size-percentage-bar}} {{size-used}} / {{size-total}} ({{size-percentage}})" }},
+    {{ "type": "uptime", "key": "encendida ", "format": "{{?days}}{{days}} d {{?}}{{hours}} h {{minutes}} min" }},
+    "break",
+    {{ "type": "command", "key": " ", "text": "echo -e \\"{dots}\\\\e[0m  \\\\e[{esc(muted)}m$(omarchy-theme-current)\\\\e[0m\\"" }}
+  ]
+}}
+""")
+print("bruno-colors: recolored from", os.path.basename(os.path.dirname(colors_path)))
+PY

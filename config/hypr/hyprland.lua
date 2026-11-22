@@ -36,3 +36,14 @@ hl.config({
     rounding_power = 2,
   },
 })
+
+-- Each app on its own workspace: Spotify opens on 3 and Chromium on 2,
+-- instead of splitting the workspace you are on. Add "silent" (e.g. "3 silent")
+-- to open them there without switching to that workspace.
+o.window({ initial_class = "^[Ss]potify$" }, { workspace = "3" })
+o.window({ initial_class = "^[Cc]hromium$" }, { workspace = "2" })
+
+-- Cursor: Catppuccin Mocha Dark (AUR catppuccin-cursors-mocha). Until it is
+-- installed, the default cursor stays.
+hl.env("XCURSOR_THEME", "catppuccin-mocha-dark-cursors")
+hl.env("HYPRCURSOR_THEME", "catppuccin-mocha-dark-cursors")

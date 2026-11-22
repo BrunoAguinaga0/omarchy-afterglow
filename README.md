@@ -22,6 +22,9 @@ Mis personalizaciones de Omarchy (tema Ristretto).
   - `foot/foot.ini`: margen de la terminal y fuente de respaldo para los símbolos del prompt.
   - `starship.toml`: prompt en píldoras.
   - `fastfetch/`: fastfetch compacto con logo propio.
+  - `omarchy/hooks/theme-set.d/bruno-colors`: al cambiar de tema, recolorea el menú, las notificaciones, el prompt y fastfetch con los colores del tema nuevo.
+  - `omarchy/plymouth/`: pantalla de arranque "bruno" (fondo desenfocado, tarjeta de vidrio, contraseña redondeada) e `install.sh`, que la instala junto con el cursor Catppuccin Mocha Dark. Pide sudo; `restore.sh` no lo corre solo. Para volver a la de Omarchy: `omarchy plymouth set by theme ristretto`.
+  - `hypr/hyprland.lua` también abre Spotify en el escritorio 3 y Chromium en el 2, y elige el cursor.
 - `state/`: interruptores de Omarchy, tema y fondo elegidos.
 
 ## Guardar cambios

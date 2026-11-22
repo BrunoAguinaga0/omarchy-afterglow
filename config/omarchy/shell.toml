@@ -1,8 +1,8 @@
 [font]
 base-size = 12
 
-# ── Retoques (22/11/2026): menu and notifications in the bar islands' glass ──
-# Hex colors are Ristretto's; Hyprland blurs what is behind these layers.
+# >>> bruno-colors (written by the theme-set hook; edits here are replaced)
+# Menu and notifications in the bar islands' glass; Hyprland blurs behind them.
 [menu]
 background-alpha          = 0.78
 border                    = "#e6d9db"
@@ -20,3 +20,4 @@ background-alpha = 0.72
 border           = "#e6d9db"
 border-alpha     = 0.12
 border-width     = 1
+# <<< bruno-colors

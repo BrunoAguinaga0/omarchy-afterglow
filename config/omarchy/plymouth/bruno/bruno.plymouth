@@ -1,0 +1,10 @@
+[Plymouth Theme]
+Name=Bruno
+Description=Omarchy boot screen in the bar islands' glass: blurred wallpaper, glass card, rounded password field.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/bruno
+ScriptFile=/usr/share/plymouth/themes/bruno/bruno.script
+ConsoleLogBackgroundColor=0x181414
+MonospaceFont=Cantarell 11

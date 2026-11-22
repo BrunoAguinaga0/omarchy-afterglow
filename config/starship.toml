@@ -1,29 +1,29 @@
-# Prompt in pills, like the bar islands (Ristretto colors).
-# Folder in an orange-tinted pill, git branch in a grey one, then an orange ❯.
+# Prompt in pills, like the bar islands. Written by the theme-set hook
+# (bruno-colors) from the active theme; edits here are replaced.
 add_newline = true
 command_timeout = 200
 format = "$directory$git_branch$git_status$character"
 
 [character]
 success_symbol = "[ ❯](bold #f38d70)"
-error_symbol = "[ ✗](bold #bf4062)"
+error_symbol = "[ ✗](bold #fd6883)"
 
 [directory]
 truncation_length = 2
 truncation_symbol = "…/"
-style = "fg:#ffd2c2 bg:#7a4536"
-read_only_style = "fg:#ffd2c2 bg:#7a4536"
-format = "[](fg:#7a4536)[$path]($style)[$read_only]($read_only_style)[](fg:#7a4536)"
-repo_root_style = "bold fg:#ffd2c2 bg:#7a4536"
-repo_root_format = "[](fg:#7a4536)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style)[](fg:#7a4536)"
+style = "fg:#f8c0b0 bg:#7c4f43"
+read_only_style = "fg:#f8c0b0 bg:#7c4f43"
+format = "[](fg:#7c4f43)[$path]($style)[$read_only]($read_only_style)[](fg:#7c4f43)"
+repo_root_style = "bold fg:#f8c0b0 bg:#7c4f43"
+repo_root_format = "[](fg:#7c4f43)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style)[](fg:#7c4f43)"
 
 [git_branch]
-style = "fg:#e6d9db bg:#4a3f3f"
-format = " [](fg:#4a3f3f)[$branch]($style)"
+style = "fg:#e6d9db bg:#463e3e"
+format = " [](fg:#463e3e)[$branch]($style)"
 
 [git_status]
-style = "fg:#e6d9db bg:#4a3f3f"
-format = "[ $all_status$ahead_behind]($style)[](fg:#4a3f3f)"
+style = "fg:#e6d9db bg:#463e3e"
+format = "[ $all_status$ahead_behind]($style)[](fg:#463e3e)"
 ahead = "⇡${count}"
 diverged = "⇕⇡${ahead_count}⇣${behind_count}"
 behind = "⇣${count}"

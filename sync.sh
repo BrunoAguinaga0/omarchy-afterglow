@@ -19,6 +19,10 @@ for f in "${config_files[@]}"; do
   mkdir -p "config/$(dirname "$f")"
   cp "$HOME/.config/$f" "config/$f"
 done
+for d in "${config_dirs[@]}"; do
+  mkdir -p "config/$d"
+  rsync -a --delete --exclude '*.sample' "$HOME/.config/$d/" "config/$d/"
+done
 
 # Omarchy toggles (glassy windows, no gaps, rounded corners, screensaver off...).
 mkdir -p state/toggles
