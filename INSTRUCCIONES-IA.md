@@ -10,7 +10,7 @@ Seguí los pasos en orden, verificá cada uno y avisale al usuario si algo falla
 
 ## Cómo se ve
 
-- **Tema Ristretto** con el fondo `3-industrial-moon.webp`. El diseño sigue los colores de cualquier tema: si el usuario cambia de tema, menú, notificaciones, prompt y fastfetch se recolorean solos.
+- **Tema Ristretto** con el fondo `3-industrial-moon.webp`. El diseño sigue los colores de cualquier tema: si el usuario cambia de tema, menú, notificaciones, paneles de la barra, prompt y fastfetch se recolorean solos.
 - **Barra arriba en islas flotantes de vidrio** (`bruno.bar`):
   - Izquierda: botón de menú (`bruno.menu`) y escritorios con pastilla animada e íconos de las apps abiertas (`bruno.workspaces`).
   - Centro: reloj (`bruno.clock`) que se corre a la derecha cuando suena música, y mini reproductor (`bruno.music`) que ocupa la isla, con portada, halo en los colores de la portada y menú al pasar el mouse.
@@ -106,7 +106,7 @@ for f in omarchy/shell.toml omarchy/lock.json hypr/looknfeel.lua starship.toml f
 done
 ```
 
-- `shell.toml`: vidrio y bordes del menú y las notificaciones.
+- `shell.toml`: vidrio y bordes del menú, las notificaciones y los paneles de la barra (red, Bluetooth, audio, pantalla, clima…).
 - `lock.json`: formato de hora del bloqueo y estilo del aura (`halo`).
 - `looknfeel.lua`: espacios, animaciones, ventana inactiva atenuada y sin borde con una sola ventana. Si el usuario ya tenía cosas propias ahí, mostrale el `.bak` y ofrecé sumarlas al final.
 

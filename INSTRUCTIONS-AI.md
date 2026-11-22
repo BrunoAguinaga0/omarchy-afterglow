@@ -106,7 +106,7 @@ for f in omarchy/shell.toml omarchy/lock.json hypr/looknfeel.lua starship.toml f
 done
 ```
 
-- `shell.toml`: glass and borders for the menu and notifications.
+- `shell.toml`: glass and borders for the menu, notifications and bar panels (network, Bluetooth, audio, display, weather…).
 - `lock.json`: lock screen time format and aura style (`halo`).
 - `looknfeel.lua`: gaps, animations, dimmed inactive window and no border with a single window. If the user had their own settings there, show them the `.bak` and offer to append them at the end.
 

@@ -20,4 +20,31 @@ background-alpha = 0.72
 border           = "#e6d9db"
 border-alpha     = 0.12
 border-width     = 1
+
+# Bar panels (network, Bluetooth, audio, display, weather, performance...)
+# in the same glass as the islands, instead of a solid card with an accent
+# frame.
+[popups]
+background-alpha = 0.78
+border           = "#e6d9db"
+border-alpha     = 0.12
+border-width     = 1
+
+# Buttons, chips and rows inside the panels: quieter outlines, and the chosen
+# option in the accent, like the menu's selected row.
+[controls]
+normal-fill-alpha         = 0.05
+normal-border             = "#e6d9db"
+normal-border-alpha       = 0.12
+hover-cursor-fill-alpha   = 0.09
+hover-cursor-border       = "#e6d9db"
+hover-cursor-border-alpha = 0.22
+focus-fill-alpha          = 0.09
+focus-border              = "#e6d9db"
+focus-border-alpha        = 0.22
+selected-color            = "#f38d70"
+selected-fill-alpha       = 0.14
+selected-border           = "#f38d70"
+selected-border-width     = 1
+selected-border-alpha     = 0.5
 # <<< bruno-colors

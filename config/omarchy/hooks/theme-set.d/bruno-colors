@@ -72,6 +72,33 @@ background-alpha = 0.72
 border           = "{fg}"
 border-alpha     = 0.12
 border-width     = 1
+
+# Bar panels (network, Bluetooth, audio, display, weather, performance...)
+# in the same glass as the islands, instead of a solid card with an accent
+# frame.
+[popups]
+background-alpha = 0.78
+border           = "{fg}"
+border-alpha     = 0.12
+border-width     = 1
+
+# Buttons, chips and rows inside the panels: quieter outlines, and the chosen
+# option in the accent, like the menu's selected row.
+[controls]
+normal-fill-alpha         = 0.05
+normal-border             = "{fg}"
+normal-border-alpha       = 0.12
+hover-cursor-fill-alpha   = 0.09
+hover-cursor-border       = "{fg}"
+hover-cursor-border-alpha = 0.22
+focus-fill-alpha          = 0.09
+focus-border              = "{fg}"
+focus-border-alpha        = 0.22
+selected-color            = "{accent}"
+selected-fill-alpha       = 0.14
+selected-border           = "{accent}"
+selected-border-width     = 1
+selected-border-alpha     = 0.5
 # <<< bruno-colors
 """
 shell_path = os.path.join(config, "omarchy/shell.toml")

@@ -56,7 +56,7 @@ Vidrio esmerilado, esquinas de 18 px, ventana inactiva atenuada, borde solo con 
 
 ### También
 
-- **Colores que siguen al tema:** al cambiar de tema, el hook `bruno-colors` recolorea el menú, las notificaciones, el prompt y fastfetch.
+- **Colores que siguen al tema:** al cambiar de tema, el hook `bruno-colors` recolorea el menú, las notificaciones, los paneles de la barra, el prompt y fastfetch.
 - **Pantalla de arranque** Plymouth "bruno" (fondo desenfocado, tarjeta de vidrio, contraseña redondeada) y **cursor** Catppuccin Mocha Dark.
 
 ## Instalar
@@ -81,7 +81,7 @@ La forma más simple es pedirle a una IA con acceso a tu terminal (Claude Code, 
 | Bloqueo y protector | `plugins/bibek.lock` | [omarchy-better-lock](https://github.com/BibekBhusal0/omarchy-better-lock) de Bibek Bhusal (MIT), con cambios |
 | Rendimiento en un ícono | `plugins/skyhonnor.performance` | [omarchy-performance](https://github.com/SkyHonnor/omarchy-performance) de SkyHonnor (MIT), opción `compact` |
 | Orden de la barra y plugins activos | `config/omarchy/shell.json` | |
-| Vidrio del menú y las notificaciones | `config/omarchy/shell.toml` | |
+| Vidrio del menú, las notificaciones y los paneles de la barra | `config/omarchy/shell.toml` | |
 | Opciones del bloqueo | `config/omarchy/lock.json` | |
 | Espacios, animaciones, atenuado, bordes | `config/hypr/looknfeel.lua` | |
 | Esquinas y cursor | final de `config/hypr/hyprland.lua` | |

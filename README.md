@@ -58,7 +58,7 @@ Frosted glass, 18 px corners, dimmed inactive window, a border only with two or 
 
 ### Also
 
-- **Colors that follow the theme:** when you switch themes, the `bruno-colors` hook recolors the menu, notifications, prompt and fastfetch.
+- **Colors that follow the theme:** when you switch themes, the `bruno-colors` hook recolors the menu, notifications, bar panels, prompt and fastfetch.
 - Plymouth **boot screen** "bruno" (blurred wallpaper, glass card, rounded password field) and Catppuccin Mocha Dark **cursor**.
 
 ## Install
@@ -83,7 +83,7 @@ The easiest way is to ask an AI assistant with access to your terminal (Claude C
 | Lock screen and screensaver | `plugins/bibek.lock` | [omarchy-better-lock](https://github.com/BibekBhusal0/omarchy-better-lock) by Bibek Bhusal (MIT), with changes |
 | Performance in one icon | `plugins/skyhonnor.performance` | [omarchy-performance](https://github.com/SkyHonnor/omarchy-performance) by SkyHonnor (MIT), `compact` option |
 | Bar layout and active plugins | `config/omarchy/shell.json` | |
-| Menu and notification glass | `config/omarchy/shell.toml` | |
+| Menu, notification and bar panel glass | `config/omarchy/shell.toml` | |
 | Lock screen options | `config/omarchy/lock.json` | |
 | Gaps, animations, dimming, borders | `config/hypr/looknfeel.lua` | |
 | Corners and cursor | end of `config/hypr/hyprland.lua` | |
