@@ -328,8 +328,41 @@ Panel {
   // it has left both the pill and the menu. A click pins it open.
   property bool hoverOpen: false
   property bool cardHovered: false
-  readonly property bool pointerInside: hover.hovered || cardHovered
-  onOpenedChanged: if (!opened) hoverOpen = false
+  property bool pillShadowHovered: false
+  // While the menu is open by hover, the pointer is also tracked by asking
+  // Hyprland where it is: with the panel's full-screen surface mapped over the
+  // bar, hover events over the pill are unreliable.
+  property bool polledInside: false
+  readonly property bool polling: hoverOpen && opened
+  onPollingChanged: if (!polling) polledInside = false
+  Timer {
+    interval: 50
+    repeat: true
+    running: root.polling
+    triggeredOnStart: true
+    onTriggered: if (!cursorProc.running) cursorProc.running = true
+  }
+  Process {
+    id: cursorProc
+    command: ["hyprctl", "cursorpos"]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        var m = String(text).match(/(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/)
+        if (!m || !root.polling) return
+        var x = parseFloat(m[1]), y = parseFloat(m[2])
+        var pp = pill.mapToGlobal(0, 0)
+        var m1 = Style.space(6), m2 = Style.space(10)
+        var inPill = x >= pp.x - m1 && x <= pp.x + pill.width + m1 && y >= 0 && y <= pp.y + pill.height + m1
+        var cx = panel.cardOrigin.x, cy = panel.cardOrigin.y
+        var inCard = x >= cx - m2 && x <= cx + panel.contentWidth + m2 && y >= cy - m2 && y <= cy + panel.drawnHeight + m2
+        var left = Math.max(pp.x, cx), right = Math.min(pp.x + pill.width, cx + panel.contentWidth)
+        var inGap = x >= left && x <= right && y >= pp.y && y <= cy
+        root.polledInside = inPill || inCard || inGap
+      }
+    }
+  }
+  readonly property bool pointerInside: hover.hovered || cardHovered || pillShadowHovered || polledInside
+  onOpenedChanged: { if (!opened) { pillShadowHovered = false; hoverOpen = false } }
   onPointerInsideChanged: {
     if (pointerInside) { closeDelay.stop(); if (!opened && musicOn) openDelay.restart() }
     else { openDelay.stop(); if (hoverOpen) closeDelay.restart() }
@@ -341,11 +374,11 @@ Panel {
   }
   Timer {
     id: closeDelay
-    interval: 350
+    interval: 120
     onTriggered: if (root.hoverOpen && !root.pointerInside) root.close()
   }
 
-  KeyboardPanel {
+  MusicPanel {
     id: panel
     anchorItem: pill
     owner: root
@@ -359,6 +392,26 @@ Panel {
     borderSpec: ({ color: "transparent", widths: { top: 0, right: 0, bottom: 0, left: 0 }, gradient: null })
     // Opened by hover it must not steal the keyboard from the app in use.
     WlrLayershell.keyboardFocus: panel.open && !root.hoverOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    // The panel's full-screen surface sits over the pill too, so once it is
+    // open the pill stops feeling the pointer. This invisible patch over the
+    // pill, inside the panel, keeps the pointer counted as "on the pill";
+    // a click there behaves like a click on the pill.
+    Item {
+      readonly property point pillPos: pill.mapToGlobal(0, 0)
+      x: pillPos.x - Style.space(4)
+      y: 0
+      width: pill.width + Style.space(8)
+      height: pillPos.y + pill.height + Style.space(4)
+      visible: panel.open
+      MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton
+        cursorShape: Qt.PointingHandCursor
+        onContainsMouseChanged: root.pillShadowHovered = containsMouse
+        onClicked: { if (root.hoverOpen) root.hoverOpen = false; else root.close() }
+      }
+    }
 
     content: PanelKeyCatcher {
       anchors.fill: parent
