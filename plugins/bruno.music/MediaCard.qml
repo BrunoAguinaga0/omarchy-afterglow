@@ -16,7 +16,10 @@ Item {
   property bool styleCursor: false
 
   property bool showStyleButton: true
+  // Stronger cover colors (bar menu); the lock screen keeps the quiet look.
+  property bool vivid: false
   signal interacted
+  signal bodyClicked
   signal previousRequested
   signal playPauseRequested
   signal nextRequested
@@ -119,14 +122,14 @@ Item {
       blurEnabled: true
       blur: 1.0
       blurMax: 64
-      saturation: 0.25
+      saturation: card.vivid ? 0.9 : 0.25
     }
 
     // Theme-coloured veil keeps text legible on any cover.
     Rectangle {
       anchors.fill: parent
       visible: card.hasArt
-      color: Util.alpha(Color.lock.background, 0.72)
+      color: Util.alpha(Color.lock.background, card.vivid ? 0.5 : 0.72)
     }
 
     // Soft accent glow from the left edge.
@@ -134,9 +137,9 @@ Item {
       anchors.fill: parent
       gradient: Gradient {
         orientation: Gradient.Horizontal
-        GradientStop { position: 0.0; color: Util.alpha(card.coverPalette[0], 0.22) }
-        GradientStop { position: 0.5; color: Util.alpha(card.coverPalette[0], 0.0) }
-        GradientStop { position: 1.0; color: Util.alpha(card.coverPalette[1], 0.16) }
+        GradientStop { position: 0.0; color: Util.alpha(card.coverPalette[0], card.vivid ? 0.4 : 0.22) }
+        GradientStop { position: 0.5; color: Util.alpha(card.coverPalette[2], card.vivid ? 0.12 : 0.0) }
+        GradientStop { position: 1.0; color: Util.alpha(card.coverPalette[1], card.vivid ? 0.34 : 0.16) }
       }
     }
   }
@@ -152,7 +155,8 @@ Item {
     anchors.fill: parent
     hoverEnabled: true
     onPositionChanged: card.interacted()
-    onClicked: card.interacted()
+    cursorShape: card.vivid ? Qt.PointingHandCursor : Qt.ArrowCursor
+    onClicked: { card.interacted(); card.bodyClicked() }
   }
 
   Row {

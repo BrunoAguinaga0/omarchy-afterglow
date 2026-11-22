@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Mpris
 import Quickshell.Wayland
 import qs.Commons
@@ -40,7 +41,7 @@ Panel {
     if (playing) { recentlyPlaying = true; lingerTimer.stop() }
     else lingerTimer.restart()
   }
-  Component.onCompleted: recentlyPlaying = playing
+  Component.onCompleted: { recentlyPlaying = playing; cava.running = audioWanted }
   Timer { id: lingerTimer; interval: 60000; onTriggered: root.recentlyPlaying = root.playing }
   readonly property bool musicOn: hasMedia && (playing || recentlyPlaying)
   onMusicOnChanged: if (!musicOn) close()
@@ -74,6 +75,31 @@ Panel {
   onBarChanged: syncIsland()
   Component.onDestruction: if (bar && typeof bar.setCenterIslandYielded === "function") bar.setCenterIslandYielded(false)
 
+  // Aura in the cover's colors behind the pill, like the "now playing" notice.
+  Rectangle {
+    id: pillAura
+    anchors.centerIn: pill
+    width: pill.width + Style.space(16)
+    height: pill.height + Style.space(6)
+    radius: height / 2
+    // Follows the music's bass; steady when there is no audio feed.
+    opacity: root.audioLevel < 0 ? 0.75 : 0.35 + 0.65 * root.audioLevel
+    Behavior on opacity { NumberAnimation { duration: 90 } }
+    gradient: Gradient {
+      orientation: Gradient.Horizontal
+      GradientStop { position: 0.0; color: root.tones[0] }
+      GradientStop { position: 0.5; color: root.tones[1] }
+      GradientStop { position: 1.0; color: root.tones[2] }
+    }
+    layer.enabled: true
+    layer.effect: MultiEffect {
+      blurEnabled: true
+      blur: 1.0
+      blurMax: 32
+      autoPaddingEnabled: true
+    }
+  }
+
   Rectangle {
     id: pill
     anchors.verticalCenter: parent.verticalCenter
@@ -85,9 +111,17 @@ Panel {
     color: root.fillIsland ? root.bar.islandColor : "transparent"
 
     Rectangle {
+      id: tint
       anchors.fill: parent
       radius: parent.radius
-      color: Util.alpha(root.tones[0], hover.hovered || root.opened ? 0.3 : 0.18)
+      // The cover's colors run softly across the pill.
+      readonly property real strength: hover.hovered || root.opened ? 1.35 : 1
+      gradient: Gradient {
+        orientation: Gradient.Horizontal
+        GradientStop { position: 0.0; color: Util.alpha(root.tones[0], 0.30 * tint.strength) }
+        GradientStop { position: 0.55; color: Util.alpha(root.tones[1], 0.20 * tint.strength) }
+        GradientStop { position: 1.0; color: Util.alpha(root.tones[2], 0.28 * tint.strength) }
+      }
       border.width: 1
       border.color: Util.alpha(root.tones[0], 0.6)
       Behavior on color { ColorAnimation { duration: Style.duration(150) } }
@@ -224,6 +258,44 @@ Panel {
   function previous() { if (player && player.canGoPrevious) { quietAnnounce(); player.previous() } }
   function next() { if (player && player.canGoNext) { quietAnnounce(); player.next() } }
 
+  // Live audio level (0-1) for the auras, from cava while music plays;
+  // -1 means no feed. Low bands weigh most, so the glow beats with the bass.
+  property real audioLevel: -1
+  readonly property bool audioWanted: playing && !vertical && !Style.reduceMotion
+  property int cavaFailures: 0
+  onAudioWantedChanged: {
+    if (!audioWanted) { audioLevel = -1; cavaFailures = 0 }
+    cava.running = audioWanted && cavaFailures < 3
+  }
+
+  function handleCavaFrame(line) {
+    var parts = String(line).split(";")
+    var v = []
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] === "") continue
+      if (!/^[0-9]{1,3}$/.test(parts[i])) return
+      v.push(Math.min(100, parseInt(parts[i], 10)) / 100)
+    }
+    if (v.length < 3) return
+    audioLevel = Math.min(1, 0.65 * v[0] + 0.25 * v[1] + 0.1 * v[2])
+  }
+
+  Process {
+    id: cava
+    command: ["/usr/bin/stdbuf", "-oL", "/usr/bin/cava", "-p",
+      decodeURIComponent(String(Qt.resolvedUrl("cava.conf")).replace(/^file:\/\//, ""))]
+    stdout: SplitParser { onRead: function(data) { root.handleCavaFrame(data) } }
+    onExited: function(exitCode) {
+      root.audioLevel = -1
+      if (root.audioWanted) { root.cavaFailures += 1; cavaRetry.restart() }
+    }
+  }
+  Timer {
+    id: cavaRetry
+    interval: 2000
+    onTriggered: cava.running = root.audioWanted && root.cavaFailures < 3
+  }
+
   // Hover: the menu opens while the pointer rests on the pill and closes once
   // it has left both the pill and the menu. A click pins it open.
   property bool hoverOpen: false
@@ -272,6 +344,30 @@ Panel {
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
 
+      // Aura in the cover's colors behind the menu, like the "now playing" notice.
+      Rectangle {
+        id: menuAura
+        anchors.fill: parent
+        anchors.margins: -Style.space(10)
+        radius: Style.cornerRadius + Style.space(10)
+        // Softer than the pill's, and following the music's bass.
+        opacity: root.audioLevel < 0 ? 0.45 : 0.22 + 0.43 * root.audioLevel
+        Behavior on opacity { NumberAnimation { duration: 90 } }
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: root.tones[0] }
+          GradientStop { position: 0.5; color: root.tones[1] }
+          GradientStop { position: 1.0; color: root.tones[2] }
+        }
+        layer.enabled: true
+        layer.effect: MultiEffect {
+          blurEnabled: true
+          blur: 1.0
+          blurMax: 32
+          autoPaddingEnabled: true
+        }
+      }
+
       HoverHandler {
         onHoveredChanged: root.cardHovered = hovered
         Component.onDestruction: root.cardHovered = false
@@ -283,6 +379,11 @@ Panel {
         height: implicitHeight
         player: root.player
         showStyleButton: false
+        vivid: true
+        onBodyClicked: {
+          if (root.player && root.player.canRaise) root.player.raise()
+          root.close()
+        }
         onPreviousRequested: root.previous()
         onPlayPauseRequested: if (root.player) root.player.togglePlaying()
         onNextRequested: root.next()

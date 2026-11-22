@@ -120,18 +120,18 @@ PanelWindow {
     // Soft glow in the cover's colours, breathing gently.
     Rectangle {
       id: glow
-      x: pill.x + 12
-      y: pill.y + stage.drop + 6
-      width: pill.width - 24
-      height: pill.height - 12
+      x: pill.x - 6
+      y: pill.y + stage.drop - 2
+      width: pill.width + 12
+      height: pill.height + 4
       radius: height / 2
       property real pulse: 0.7
       opacity: pulse
       SequentialAnimation on pulse {
         running: win.showing && !Style.reduceMotion
         loops: Animation.Infinite
-        NumberAnimation { from: 0.55; to: 1; duration: 900; easing.type: Easing.InOutSine }
-        NumberAnimation { from: 1; to: 0.55; duration: 900; easing.type: Easing.InOutSine }
+        NumberAnimation { from: 0.75; to: 1; duration: 900; easing.type: Easing.InOutSine }
+        NumberAnimation { from: 1; to: 0.75; duration: 900; easing.type: Easing.InOutSine }
       }
       gradient: Gradient {
         orientation: Gradient.Horizontal
@@ -171,7 +171,19 @@ PanelWindow {
       radius: Style.cornerRadius + 2
       color: Util.alpha(Color.notifications.background, 0.92)
       border.width: 1
-      border.color: Util.alpha(coverColors.colors[0], 0.7)
+      border.color: Util.alpha(coverColors.colors[0], 0.9)
+
+      // The cover's colors wash across the pill.
+      Rectangle {
+        anchors.fill: parent
+        radius: parent.radius
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: Util.alpha(coverColors.colors[0], 0.34) }
+          GradientStop { position: 0.5; color: Util.alpha(coverColors.colors[1], 0.18) }
+          GradientStop { position: 1.0; color: Util.alpha(coverColors.colors[2], 0.30) }
+        }
+      }
 
       Row {
         anchors.fill: parent
