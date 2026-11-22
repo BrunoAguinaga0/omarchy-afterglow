@@ -16,7 +16,7 @@ Seguí los pasos en orden, verificá cada uno y avisale al usuario si algo falla
   - Centro: reloj (`bruno.clock`) que se corre a la derecha cuando suena música, y mini reproductor (`bruno.music`) que ocupa la isla, con portada, halo en los colores de la portada y menú al pasar el mouse.
   - Derecha: bandeja, rendimiento en un solo ícono (`skyhonnor.performance`), distribución de teclado, indicadores, actualizaciones, clima, reloj (solo con música) y centro de control (`bruno.control`: red, sonido, luz nocturna, no molestar).
 - **Menú de Super + Espacio** rediseñado: buscador con lupa, íconos en cuadraditos, separadores y ayuda de teclado.
-- **Pantalla de bloqueo** `bibek.lock`: tarjeta de música, aura de colores que late con la música, clima, aviso "ahora suena" y protector de pantalla propio (la portada grande con el aura, o un reloj sin música) en lugar del protector de terminal de Omarchy.
+- **Pantalla de bloqueo** `bibek.lock`: fondo teñido con los colores de la portada, tarjeta de música en el centro, aura que late con la música (y respira lenta sin música), borde de la contraseña del color de la canción, botones de apagado redondos, textos en el idioma de Omarchy, clima, aviso "ahora suena" y protector de pantalla propio (la portada grande con el aura, o un reloj sin música) en lugar del protector de terminal de Omarchy.
 - **Avisos de volumen y brillo** rediseñados (`bruno.osd`).
 - **Ventanas**: vidrio esmerilado, esquinas redondeadas de 18 px, espacios de 4/8 px, ventana inactiva atenuada, sin borde cuando hay una sola ventana, animaciones "popin" y deslizamientos suaves.
 - **Terminal** `foot` con márgenes amplios, prompt `starship` en píldoras y `fastfetch` compacto con un logo cuadrado.
@@ -107,7 +107,7 @@ done
 ```
 
 - `shell.toml`: vidrio y bordes del menú, las notificaciones y los paneles de la barra (red, Bluetooth, audio, pantalla, clima…).
-- `lock.json`: formato de hora del bloqueo y estilo del aura (`halo`).
+- `lock.json`: hora en 24 h y estilo del aura (`halo`). La fecha sigue el idioma de Omarchy.
 - `looknfeel.lua`: espacios, animaciones, ventana inactiva atenuada y sin borde con una sola ventana. Si el usuario ya tenía cosas propias ahí, mostrale el `.bak` y ofrecé sumarlas al final.
 
 ### 6. Terminal (`foot.ini`)

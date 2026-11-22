@@ -52,7 +52,7 @@ Buscador con lupa, íconos en cuadraditos, separadores y ayuda de teclado. Todos
 
 ### Pantalla de bloqueo y protector
 
-Tarjeta de música, aura alrededor de la pantalla que late con la música, clima y aviso "ahora suena". El protector muestra la portada grande con el aura, o un reloj si no suena nada.
+El fondo entero toma los colores de la portada, la tarjeta de música queda en el centro y un aura alrededor de la pantalla late con la música (sin música, respira lenta en los colores del tema). El borde de la contraseña toma el color de la canción y se enciende al escribir. Los textos siguen el idioma de Omarchy. El protector muestra la portada grande con el aura, o un reloj si no suena nada.
 
 | Bloqueo | Protector |
 |---|---|

@@ -1,6 +1,5 @@
 {
-  "timeFormat": "hh:mm AP",
-  "dateFormat": "dddd, MMMM d",
+  "timeFormat": "HH:mm",
   "auraStyle": "halo",
   "auraIntensity": 1
 }

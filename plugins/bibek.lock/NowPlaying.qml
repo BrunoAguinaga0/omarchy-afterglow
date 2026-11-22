@@ -9,6 +9,7 @@ import qs.Commons
 // whenever the track changes. Its glow uses the cover's colours. Clicking it
 // raises the player.
 PanelWindow {
+  Translations { id: nowStrings; directory: Qt.resolvedUrl("i18n") }
   id: win
 
   property bool suppressed: false
@@ -237,7 +238,8 @@ PanelWindow {
           spacing: 3
 
           Text {
-            text: "AHORA SUENA"
+            textFormat: Text.PlainText
+            text: nowStrings.t("lock.nowPlaying")
             color: coverColors.colors[0]
             font.family: Style.font.family
             font.pixelSize: Style.font.bodySmall

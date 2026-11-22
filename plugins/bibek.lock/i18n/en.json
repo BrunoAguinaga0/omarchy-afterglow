@@ -1,0 +1,11 @@
+{
+  "lock.password": "Password",
+  "lock.checking": "Checking…",
+  "lock.failed": "Wrong password (%1)",
+  "lock.sleep": "Sleep",
+  "lock.shutdown": "Shut down",
+  "lock.restart": "Restart",
+  "lock.dateFormat": "dddd, MMMM d",
+  "lock.aura": "Aura: %1",
+  "lock.nowPlaying": "NOW PLAYING"
+}

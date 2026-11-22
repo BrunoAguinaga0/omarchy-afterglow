@@ -16,7 +16,7 @@ Follow the steps in order, verify each one and tell the user if anything fails. 
   - Center: clock (`bruno.clock`) that moves to the right when music plays, and a mini player (`bruno.music`) that takes over the island, with the cover, a glow in the cover's colors and a menu on hover.
   - Right: tray, performance in a single icon (`skyhonnor.performance`), keyboard layout, indicators, updates, weather, clock (only with music) and control center (`bruno.control`: network, sound, night light, do not disturb).
 - **Super + Space menu** redesigned: search field with a magnifier, icons in small squares, separators and a keyboard hint.
-- **Lock screen** `bibek.lock`: music card, a color aura that pulses with the music, weather, a "now playing" notice and its own screensaver (the cover large with the aura, or a clock without music) instead of Omarchy's terminal screensaver.
+- **Lock screen** `bibek.lock`: background tinted with the cover's colors, music card in the middle, an aura that pulses with the music (and breathes slowly without it), password border in the song's color, round power buttons, text in Omarchy's language, weather, a "now playing" notice and its own screensaver (the cover large with the aura, or a clock without music) instead of Omarchy's terminal screensaver.
 - **Volume and brightness notices** redesigned (`bruno.osd`).
 - **Windows**: frosted glass, 18 px rounded corners, 4/8 px gaps, dimmed inactive window, no border with a single window, "popin" animations and smooth slides.
 - **Terminal** `foot` with wide padding, `starship` prompt in pills and a compact `fastfetch` with a square logo.
@@ -107,7 +107,7 @@ done
 ```
 
 - `shell.toml`: glass and borders for the menu, notifications and bar panels (network, Bluetooth, audio, display, weather…).
-- `lock.json`: lock screen time format and aura style (`halo`).
+- `lock.json`: 24-hour time and aura style (`halo`). The date follows Omarchy's language.
 - `looknfeel.lua`: gaps, animations, dimmed inactive window and no border with a single window. If the user had their own settings there, show them the `.bak` and offer to append them at the end.
 
 The fastfetch labels are in Spanish. If the user prefers English, translate the `key` values in `~/.config/fastfetch/config.jsonc` after copying.

@@ -54,7 +54,7 @@ Search field with a magnifier, icons in small squares, separators and a keyboard
 
 ### Lock screen and screensaver
 
-Music card, an aura around the screen that pulses with the music, weather and a "now playing" notice. The screensaver shows the cover large with the aura, or a clock when nothing is playing.
+The whole background takes the cover's colors, the music card sits in the middle and an aura around the screen pulses with the music (without music it breathes slowly in the theme's colors). The password border takes the song's color and lights up as you type. Text follows Omarchy's language. The screensaver shows the cover large with the aura, or a clock when nothing is playing.
 
 | Lock screen | Screensaver |
 |---|---|

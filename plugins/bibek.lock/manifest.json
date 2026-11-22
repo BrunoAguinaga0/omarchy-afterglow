@@ -18,7 +18,7 @@
   },
   "defaults": {
     "timeFormat": "hh:mm AP",
-    "dateFormat": "dddd, MMMM d",
+    "dateFormat": "",
     "auraStyle": "horizon",
     "auraIntensity": 1,
     "screensaver": true,
@@ -36,8 +36,8 @@
       "key": "dateFormat",
       "type": "string",
       "label": "Date format",
-      "defaultValue": "dddd, MMMM d",
-      "description": "Format string for lock screen date text"
+      "defaultValue": "",
+      "description": "Format string for the lock screen date; empty follows the language"
     },
     {
       "key": "auraStyle",

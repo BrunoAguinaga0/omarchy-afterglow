@@ -1,0 +1,11 @@
+{
+  "lock.password": "Contraseña",
+  "lock.checking": "Verificando…",
+  "lock.failed": "Contraseña incorrecta (%1)",
+  "lock.sleep": "Suspender",
+  "lock.shutdown": "Apagar",
+  "lock.restart": "Reiniciar",
+  "lock.dateFormat": "dddd d 'de' MMMM",
+  "lock.aura": "Aura: %1",
+  "lock.nowPlaying": "AHORA SUENA"
+}

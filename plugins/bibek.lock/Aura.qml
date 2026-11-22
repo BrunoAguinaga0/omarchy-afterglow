@@ -23,6 +23,11 @@ Item {
   property var colors: ["#ffffff", "#ffffff", "#ffffff", "#ffffff"]
   property bool present: false
   property bool playing: false
+  // No music: the aura breathes slowly and dimly in the theme's colours.
+  property bool idle: false
+  // Whether the media card is on screen (styles that glow around it hide
+  // that part without it).
+  property bool cardVisible: true
   property bool animate: true
   property real level: -1
   property real high: 0
@@ -39,7 +44,7 @@ Item {
 
   readonly property bool motion: animate && !Style.reduceMotion
   readonly property bool synthetic: level < 0
-  readonly property bool running: motion && playing && present
+  readonly property bool running: motion && present && (playing || idle)
   readonly property real k: Math.max(0.2, Math.min(2, intensity))
 
   // Seconds of animated time and the halo's rotation angle, advanced per frame.
@@ -57,10 +62,19 @@ Item {
   // Synthetic breathing when there is no audio feed.
   property real breath: 0
   SequentialAnimation on breath {
-    running: aura.running && aura.synthetic
+    running: aura.running && aura.synthetic && !aura.idle
     loops: Animation.Infinite
     NumberAnimation { from: 0.25; to: 1; duration: 900; easing.type: Easing.InOutSine }
     NumberAnimation { from: 1; to: 0.25; duration: 1200; easing.type: Easing.InOutSine }
+  }
+
+  // Idle: a slow breath, about six seconds in and out.
+  property real idleBreath: 0.5
+  SequentialAnimation on idleBreath {
+    running: aura.motion && aura.present && aura.idle
+    loops: Animation.Infinite
+    NumberAnimation { from: 0.2; to: 0.75; duration: 3200; easing.type: Easing.InOutSine }
+    NumberAnimation { from: 0.75; to: 0.2; duration: 3600; easing.type: Easing.InOutSine }
   }
 
   // Audio levels, eased just enough to hide 45 fps steps.
@@ -73,7 +87,7 @@ Item {
     NumberAnimation { duration: Style.duration(70); easing.type: Easing.OutCubic }
   }
 
-  readonly property real energy: !playing ? 0.2 : (!motion ? 0.5 : (synthetic ? breath : audioEnergy))
+  readonly property real energy: idle ? (motion ? idleBreath * 0.6 : 0.3) : (!playing ? 0.2 : (!motion ? 0.5 : (synthetic ? breath : audioEnergy)))
   readonly property real sparkle: playing && motion && !synthetic ? audioHigh : 0
 
   // Value of the spectrum at position x in 0..5 (band index, interpolated).
@@ -214,6 +228,7 @@ Item {
 
       Item {
         id: region
+        visible: aura.cardVisible
         x: aura.cardX - haloRoot.pad
         y: aura.cardY - haloRoot.pad
         width: aura.cardWidth + haloRoot.pad * 2
@@ -270,8 +285,8 @@ Item {
         id: edges
         anchors.fill: parent
         readonly property int wall: Style.space(20)
-        opacity: Math.min(1, (aura.playing && aura.motion && !aura.synthetic ? 0.3 + 0.7 * aura.audioEnergy : 0.6) * aura.k)
-        Behavior on opacity { NumberAnimation { duration: 90 } }
+        opacity: Math.min(1, (aura.idle ? (aura.motion ? 0.12 + 0.45 * aura.idleBreath : 0.35) : (aura.playing && aura.motion && !aura.synthetic ? 0.3 + 0.7 * aura.audioEnergy : 0.6)) * aura.k)
+        Behavior on opacity { NumberAnimation { duration: aura.idle ? 400 : 90 } }
         layer.enabled: true
         layer.effect: MultiEffect {
           blurEnabled: true

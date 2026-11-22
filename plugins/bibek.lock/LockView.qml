@@ -20,7 +20,8 @@ Item {
   property bool syncingPasswordText: false
   property string userName: Quickshell.env("USER") || Quickshell.env("LOGNAME") || "User"
   property string timeFormat: "hh:mm AP"
-  property string dateFormat: "dddd, MMMM d"
+  // Empty: the language's own date format (lock.dateFormat in i18n/).
+  property string dateFormat: ""
   property int focusIndex: 0
   property real audioBass: -1
   property real audioHigh: 0
@@ -37,10 +38,17 @@ Item {
       "orbs": "Orbs"
     })
 
-  readonly property string placeholderText: "Enter Password"
-  readonly property int fieldWidth: 381
-  readonly property int fieldHeight: 67
-  readonly property int outlineThickness: 3
+  // Texts follow the language picked in Omarchy (i18n/<lang>.json).
+  Translations { id: strings; directory: Qt.resolvedUrl("i18n") }
+  readonly property var formatLocale: Qt.locale(I18n.formatLocale)
+
+  readonly property string placeholderText: strings.t("lock.password")
+  // A quieter field: the music card is the centre of the screen now.
+  readonly property int fieldWidth: 320
+  readonly property int fieldHeight: 52
+  readonly property int outlineThickness: 2
+  readonly property int clockGap: 40
+  readonly property int fieldGap: 28
   readonly property int fieldFontSize: Math.round(Style.font.heading * 1.125)
   readonly property int passwordDotFontSize: Math.round(Style.font.heading * 1.33)
   readonly property int passwordDotLetterSpacing: Math.round(Style.font.heading * 0.19)
@@ -48,7 +56,13 @@ Item {
   readonly property real passwordDotScale: dotMetrics.advanceWidth > 0 ? Math.min(1, (passwordInput.width - 4) / dotMetrics.advanceWidth) : 1
   readonly property bool showPasswordCursor: inputEnabled && !authenticatingPassword && failureMessage.length === 0
   readonly property bool errorState: failureMessage.length > 0
-  readonly property var inputBorderSpec: errorState ? Border.surfaceSpec("lock", "border-error", Color.lock.borderError, root.outlineThickness, "border-alpha") : (passwordInput.activeFocus ? Border.surfaceSpec("lock", "border-active", Color.lock.borderActive, root.outlineThickness, "border-alpha") : Border.surfaceSpec("lock", "border", Color.lock.border, 1, "border-alpha"))
+  // The field's light: the cover's colour while music plays, the theme's
+  // accent otherwise; a hairline at rest, brighter and thicker while typing.
+  readonly property bool typing: passwordInput.text.length > 0 || authenticatingPassword
+  readonly property color lightColor: hasMedia ? mediaCard.accent : Color.accent
+  readonly property var inputBorderSpec: errorState
+    ? Border.surfaceSpec("lock", "border-error", Color.lock.borderError, root.outlineThickness, "border-alpha")
+    : ({ color: Util.alpha(root.lightColor, typing ? 0.95 : 0.45), widths: { top: typing ? root.outlineThickness : 1, right: typing ? root.outlineThickness : 1, bottom: typing ? root.outlineThickness : 1, left: typing ? root.outlineThickness : 1 }, gradient: { colors: [], angle: 0, enabled: false } })
 
   readonly property var mprisPlayers: Mpris.players ? Mpris.players.values : []
   readonly property var activeMprisPlayer: {
@@ -212,8 +226,8 @@ Item {
     triggeredOnStart: true
     onTriggered: {
       var now = new Date();
-      currentTimeString = Qt.formatDateTime(now, root.timeFormat);
-      currentDateString = Qt.formatDateTime(now, root.dateFormat);
+      currentTimeString = root.formatLocale.toString(now, root.timeFormat);
+      currentDateString = root.formatLocale.toString(now, root.dateFormat !== "" ? root.dateFormat : strings.t("lock.dateFormat"));
     }
   }
 
@@ -251,32 +265,88 @@ Item {
       }
     }
 
-    Image {
-      id: wallpaper
+    // Everything behind the content: the blurred wallpaper and, while music
+    // plays, the cover washed over it. The aura's glass samples this layer.
+    Item {
+      id: backdrop
       anchors.fill: parent
-      source: root.loadBackground ? root.fileUrl(root.backgroundPath) : ""
-      fillMode: Image.PreserveAspectCrop
-      asynchronous: true
-      cache: false
-      sourceSize.width: width
-      sourceSize.height: height
+
+      Image {
+        id: wallpaper
+        anchors.fill: parent
+        source: root.loadBackground ? root.fileUrl(root.backgroundPath) : ""
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        cache: false
+        sourceSize.width: width
+        sourceSize.height: height
+      }
+
+      MultiEffect {
+        id: wallpaperBlur
+        anchors.fill: wallpaper
+        source: wallpaper
+        autoPaddingEnabled: false
+        blurEnabled: root.loadBackground && wallpaper.status === Image.Ready
+        blur: 1.0
+        blurMax: 128
+        blurMultiplier: 1.6
+        contrast: -0.10
+      }
+
+      // The song's colour over the whole screen: the cover, hugely blurred,
+      // and a soft wash of its palette for covers with little colour.
+      Item {
+        id: coverWash
+        anchors.fill: parent
+        opacity: root.hasMedia && root.shown ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity {
+          NumberAnimation { duration: Style.duration(root.hasMedia ? 300 : 200); easing.type: Easing.OutCubic }
+        }
+
+        Rectangle {
+          anchors.fill: parent
+          opacity: 0.35
+          gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0; color: aura.c0 }
+            GradientStop { position: 0.55; color: aura.c1 }
+            GradientStop { position: 1.0; color: aura.c2 }
+          }
+        }
+
+        Image {
+          id: washArt
+          anchors.fill: parent
+          source: root.mediaArtUrl
+          fillMode: Image.PreserveAspectCrop
+          asynchronous: true
+          sourceSize.width: 256
+          sourceSize.height: 256
+          visible: false
+        }
+
+        MultiEffect {
+          anchors.fill: parent
+          source: washArt
+          visible: washArt.status === Image.Ready
+          opacity: 0.55
+          autoPaddingEnabled: false
+          blurEnabled: true
+          blur: 1.0
+          blurMax: 64
+          blurMultiplier: 2.0
+          saturation: 0.25
+        }
+      }
     }
 
-    MultiEffect {
-      id: wallpaperBlur
-      anchors.fill: wallpaper
-      source: wallpaper
-      autoPaddingEnabled: false
-      blurEnabled: root.loadBackground && wallpaper.status === Image.Ready
-      blur: 1.0
-      blurMax: 128
-      blurMultiplier: 1.6
-      contrast: -0.10
-    }
-
+    // Shade so the text stays readable over any cover.
     Rectangle {
       anchors.fill: parent
-      color: Qt.rgba(0, 0, 0, 0.35)
+      color: Qt.rgba(0, 0, 0, root.hasMedia ? 0.42 : 0.35)
+      Behavior on color { ColorAnimation { duration: Style.duration(300) } }
     }
 
     MouseArea {
@@ -292,7 +362,7 @@ Item {
     Aura {
       id: aura
       anchors.fill: parent
-      backdrop: wallpaperBlur
+      backdrop: backdrop
       style: root.auraStyle
       intensity: root.auraIntensity
       cardX: mediaCard.x
@@ -301,7 +371,10 @@ Item {
       cardHeight: mediaCard.height
       bands: root.audioBands
       colors: mediaCard.coverPalette
-      present: root.hasMedia && root.shown
+      // Without music the aura stays, breathing slowly in the theme's colours.
+      present: root.shown
+      idle: !root.hasMedia
+      cardVisible: root.hasMedia
       playing: root.isMediaPlaying
       animate: root.shown
       level: root.audioBass
@@ -312,12 +385,12 @@ Item {
       id: mediaCard
       width: Math.min(400, root.width - 80)
       height: implicitHeight
-      // Centred in the gap between the password field and the power buttons.
+      // The centre of the screen: clock above, password field below, the
+      // three stacked and centred as one group.
       anchors.horizontalCenter: parent.horizontalCenter
       y: {
-        var top = inputField.y + inputField.height + 24;
-        var bottom = powerControls.y - 24;
-        return Math.max(top, top + (bottom - top - height) / 2);
+        var group = timeDateColumn.height + root.clockGap + height + root.fieldGap + inputField.height;
+        return Math.round((parent.height - group) / 2 + timeDateColumn.height + root.clockGap);
       }
       player: root.activeMprisPlayer
       visible: (root.hasMedia || opacity > 0) && root.shown
@@ -361,7 +434,7 @@ Item {
       anchors.bottomMargin: 10
       visible: opacity > 0 && mediaCard.visible
       opacity: 0
-      text: "Aura: " + (root.auraStyleNames[root.auraStyle] || root.auraStyle)
+      text: strings.t("lock.aura").arg(root.auraStyleNames[root.auraStyle] || root.auraStyle)
       textFormat: Text.PlainText
       color: Color.lock.text
       font.family: Style.font.family
@@ -381,10 +454,12 @@ Item {
 
     Column {
       id: timeDateColumn
-      anchors.bottom: inputField.top
-      anchors.bottomMargin: 48
+      y: root.hasMedia ? mediaCard.y - root.clockGap - height : inputField.y - 48 - height
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 6
+      Behavior on y {
+        NumberAnimation { duration: Style.duration(220); easing.type: Easing.Bezier; easing.bezierCurve: Style.easeOut }
+      }
 
       Text {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -468,8 +543,13 @@ Item {
       id: inputField
       width: root.fieldWidth
       height: root.fieldHeight
-      anchors.centerIn: parent
-      color: Color.lock.background
+      anchors.horizontalCenter: parent.horizontalCenter
+      y: root.hasMedia ? mediaCard.y + mediaCard.height + root.fieldGap : Math.round((parent.height - height) / 2)
+      Behavior on y {
+        NumberAnimation { duration: Style.duration(220); easing.type: Easing.Bezier; easing.bezierCurve: Style.easeOut }
+      }
+      // Glass, so the song's colour shows through.
+      color: Util.alpha(Color.lock.background, root.typing ? 0.6 : 0.35)
       borderSpec: root.inputBorderSpec
       radius: Style.cornerRadius
       clip: true
@@ -541,7 +621,8 @@ Item {
 
       Text {
         anchors.fill: passwordInput
-        text: root.authenticatingPassword ? "Checking…" : (root.failureMessage.length > 0 ? root.failureMessage : root.placeholderText)
+        textFormat: Text.PlainText
+        text: root.authenticatingPassword ? strings.t("lock.checking") : (root.failureMessage.length > 0 ? strings.t("lock.failed").arg(root.failedAttempts) : root.placeholderText)
         visible: passwordInput.text.length === 0
         color: root.authenticatingPassword ? Color.lock.text : (root.failureMessage.length > 0 ? Color.lock.textError : Color.lock.placeholder)
         font.family: Style.font.family
@@ -573,37 +654,39 @@ Item {
       anchors.bottom: parent.bottom
       anchors.bottomMargin: 40
       anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 16
+      spacing: 14
 
-      Button {
-        id: sleepButton
-        text: "Sleep"
-        iconText: "󰤄"
+      // Round glass icons; the name shows on hover.
+      component PowerButton: Button {
         bordered: true
-        horizontalPadding: 20
-        verticalPadding: 10
+        horizontalPadding: 13
+        verticalPadding: 13
+        iconSize: Style.font.iconLarge
+        width: height
+        radius: height / 2
+        background: Util.alpha(Color.lock.background, 0.35)
+      }
+
+      PowerButton {
+        id: sleepButton
+        iconText: "󰤄"
+        tooltipText: strings.t("lock.sleep")
         hasCursor: root.focusIndex === 6
         onClicked: root.suspendRequested()
       }
 
-      Button {
+      PowerButton {
         id: shutdownButton
-        text: "Shutdown"
         iconText: "󰐥"
-        bordered: true
-        horizontalPadding: 20
-        verticalPadding: 10
+        tooltipText: strings.t("lock.shutdown")
         hasCursor: root.focusIndex === 7
         onClicked: root.shutdownRequested()
       }
 
-      Button {
+      PowerButton {
         id: restartButton
-        text: "Restart"
         iconText: "󰜉"
-        bordered: true
-        horizontalPadding: 20
-        verticalPadding: 10
+        tooltipText: strings.t("lock.restart")
         hasCursor: root.focusIndex === 8
         onClicked: root.rebootRequested()
       }

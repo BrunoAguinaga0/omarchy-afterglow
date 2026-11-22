@@ -39,7 +39,7 @@ Item {
   property int wakeTimeoutMs: 5000
 
   property string timeFormat: setting("timeFormat", "hh:mm AP")
-  property string dateFormat: setting("dateFormat", "dddd, MMMM d")
+  property string dateFormat: setting("dateFormat", "")
   readonly property var auraStyles: ["horizon", "halo", "spectrum", "cloud", "orbs"]
   property string auraStyle: {
     var value = String(setting("auraStyle", "horizon"));
