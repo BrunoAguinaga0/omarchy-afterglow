@@ -6,7 +6,7 @@ An [Omarchy](https://omarchy.org) desktop that takes on the color and the beat o
 
 ![Omarchy Afterglow desktop](docs/screenshots/desktop.webp)
 
-Full tour, part by part: [`docs/index.html`](docs/index.html) (download it and open it in a browser; it has an ES / EN switch).
+Full tour, part by part: **[brunoaguinaga0.github.io/omarchy-afterglow](https://brunoaguinaga0.github.io/omarchy-afterglow/)** (English and Spanish).
 
 ## What it looks like
 

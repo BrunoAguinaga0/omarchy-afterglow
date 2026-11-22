@@ -6,7 +6,7 @@ Un escritorio para [Omarchy](https://omarchy.org) que se tiñe y late con lo que
 
 ![Escritorio Omarchy Afterglow](docs/screenshots/desktop.webp)
 
-Recorrido completo, parte por parte: [`docs/index.html`](docs/index.html) (descargalo y abrilo en el navegador; tiene botón ES / EN).
+Recorrido completo, parte por parte: **[brunoaguinaga0.github.io/omarchy-afterglow](https://brunoaguinaga0.github.io/omarchy-afterglow/)** (en español e inglés).
 
 ## Cómo se ve
 
