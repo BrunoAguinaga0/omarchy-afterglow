@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "skyhonnor.performance",
+  "name": "Performance",
+  "version": "1.2.1",
+  "author": "SkyHonnor",
+  "homepage": "https://github.com/SkyHonnor/omarchy-performance",
+  "description": "CPU, RAM, multi-GPU usage/VRAM, temperatures, and fan speed at a glance. Click to expand a live panel with a quick-launch button for btop.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Performance",
+    "description": "CPU usage, RAM usage, temperatures, and fan speed",
+    "category": "System",
+    "defaultSection": "right",
+    "allowMultiple": false
+  }
+}

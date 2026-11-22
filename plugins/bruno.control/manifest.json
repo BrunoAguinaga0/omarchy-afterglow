@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "bruno.control",
+  "name": "Control center",
+  "version": "1.0.0",
+  "author": "bruno",
+  "description": "One pill for network, sound and battery that opens quick toggles and volume sliders.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "Control center",
+    "description": "Quick toggles and sliders",
+    "category": "System",
+    "allowMultiple": false
+  }
+}

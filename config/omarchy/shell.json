@@ -1,0 +1,118 @@
+{
+  "bar": {
+    "background": "opaque",
+    "id": "bruno.bar",
+    "layout": {
+      "center": [
+        {
+          "format": "dddd HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "bruno.clock",
+          "verticalFormat": "HH\n—\nmm",
+          "music": "hide"
+        },
+        {
+          "id": "bruno.music"
+        }
+      ],
+      "centerBegin": [],
+      "centerEnd": [],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "bruno.workspaces"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "skyhonnor.performance",
+          "compact": true
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "id": "omarchy.system-update"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "format": "dddd HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "bruno.clock",
+          "verticalFormat": "HH\n—\nmm",
+          "music": "only"
+        },
+        {
+          "id": "bruno.control"
+        }
+      ],
+      "tray": [
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "superwhisper.panel"
+        }
+      ]
+    },
+    "position": "top"
+  },
+  "cloneSourceRestores": [
+    "bibek.lock",
+    "bruno.osd"
+  ],
+  "disabledPlugins": [
+    "omarchy.lock",
+    "omarchy.osd"
+  ],
+  "dock": {
+    "pinned": [
+      "org.gnome.Nautilus",
+      "chromium",
+      "foot",
+      "omacalc",
+      "omawrite",
+      "X",
+      "YouTube"
+    ],
+    "position": "bottom"
+  },
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [
+    {
+      "id": "bibek.lock"
+    },
+    {
+      "id": "bruno.osd"
+    }
+  ],
+  "version": 1
+}

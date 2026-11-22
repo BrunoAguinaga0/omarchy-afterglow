@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "bruno.music",
+  "name": "Music pill",
+  "version": "1.0.0",
+  "author": "bruno",
+  "description": "Now-playing pill with cover, equalizer and scrolling title, tinted from the cover art; click for the full card with controls.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "Music pill",
+    "description": "Now-playing pill with a dropdown card",
+    "category": "Audio",
+    "allowMultiple": false
+  }
+}

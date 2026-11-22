@@ -1,0 +1,18 @@
+#!/bin/bash
+# Prints one JSON line with the current weather for the lock screen:
+# {"place","temp","code","desc","sunrise","sunset"}. Uses the location set
+# through omarchy-weather-location; without one, wttr.in guesses by IP.
+set -o pipefail
+
+place=$(omarchy-weather-location 2>/dev/null)
+query=$(jq -rn --arg place "$place" '$place | @uri')
+
+curl -fsS --max-time 8 "https://wttr.in/${query}?format=j1&lang=es" 2>/dev/null |
+  jq -ce --arg place "$place" '{
+    place: $place,
+    temp: .current_condition[0].temp_C,
+    code: .current_condition[0].weatherCode,
+    desc: ((.current_condition[0].lang_es[0].value) // (.current_condition[0].weatherDesc[0].value) // ""),
+    sunrise: (.weather[0].astronomy[0].sunrise // ""),
+    sunset: (.weather[0].astronomy[0].sunset // "")
+  }'
