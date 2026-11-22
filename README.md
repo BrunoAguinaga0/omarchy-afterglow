@@ -1,10 +1,10 @@
-# Omarchy in islands
+# Omarchy Afterglow
 
 *[Leer en español](README.es.md)*
 
-A design for [Omarchy](https://omarchy.org) with the bar split into glass islands, a player that takes its colors from the album cover, a lock screen that pulses with the music, and a redrawn menu and on-screen notices. Everything follows the colors of whatever theme you have on (Ristretto in the screenshots).
+An [Omarchy](https://omarchy.org) desktop that takes on the color and the beat of whatever you're listening to. The album cover tints the bar, the glow pulses with the bass, the lock screen is framed in an aura and the screensaver is the cover itself. Around it: a bar of glass islands, a redrawn menu, panels and on-screen notices, all following your theme's colors (Ristretto in the screenshots).
 
-![Desktop with the island bar](docs/screenshots/desktop.webp)
+![Omarchy Afterglow desktop](docs/screenshots/desktop.webp)
 
 Full tour, part by part: [`docs/index.html`](docs/index.html) (download it and open it in a browser; it has an ES / EN switch).
 
@@ -29,6 +29,16 @@ Hovering opens a menu with the cover and controls. The glow, border and buttons 
 Network, Bluetooth, do not disturb, night light, microphone, music lights, volume and microphone.
 
 <img src="docs/screenshots/control-crop.webp" width="400" alt="Control center">
+
+### Bar panels
+
+The icons in the right island open Omarchy's panels in the same glass as the islands, with switches and the chosen option in the accent color.
+
+| Audio | Network | Performance |
+|---|---|---|
+| ![Audio panel](docs/screenshots/panel-audio.webp) | ![Network panel](docs/screenshots/panel-network.webp) | ![Performance panel](docs/screenshots/panel-performance.webp) |
+| **Bluetooth** | **Display** | **Weather** |
+| ![Bluetooth panel](docs/screenshots/panel-bluetooth.webp) | ![Display panel](docs/screenshots/panel-monitor.webp) | ![Weather panel](docs/screenshots/panel-weather.webp) |
 
 ### Super + Space menu
 
@@ -92,6 +102,10 @@ The easiest way is to ask an AI assistant with access to your terminal (Claude C
 | Boot screen and cursor | `config/omarchy/plymouth/` | original |
 | Glass, corners, terminal screensaver off | `state/toggles/` | Omarchy toggles |
 
+## License
+
+MIT, see [`LICENSE`](LICENSE). Parts come from Omarchy, omarchy-better-lock and omarchy-performance, also MIT; see [`NOTICE.md`](NOTICE.md).
+
 ## For my own computer
 
 `sync.sh` and `restore.sh` keep **my** full setup, personal preferences included. If you want the design, follow [`INSTRUCTIONS-AI.md`](INSTRUCTIONS-AI.md) instead.
@@ -107,8 +121,8 @@ git commit -am "..." && git push
 Restore on another computer of mine:
 
 ```bash
-gh repo clone BrunoAguinaga0/omarchy-config
-cd omarchy-config
+gh repo clone BrunoAguinaga0/omarchy-afterglow
+cd omarchy-afterglow
 omarchy pkg add cava
 ./restore.sh
 ```

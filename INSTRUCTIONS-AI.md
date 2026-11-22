@@ -1,8 +1,8 @@
-# Instructions for an AI: apply this Omarchy design
+# Instructions for an AI: apply Omarchy Afterglow
 
 *[Leer en español](INSTRUCCIONES-IA.md)*
 
-You are an assistant with access to a terminal on a computer running **Omarchy** (Arch Linux + Hyprland). Your task is to apply the **visual design** from the repo `https://github.com/BrunoAguinaga0/omarchy-config` on top of the user's Omarchy, without overwriting their personal settings (monitors, keyboard, keybindings, apps, dock, lock timings, etc.).
+You are an assistant with access to a terminal on a computer running **Omarchy** (Arch Linux + Hyprland). Your task is to apply the **visual design** from the repo `https://github.com/BrunoAguinaga0/omarchy-afterglow` on top of the user's Omarchy, without overwriting their personal settings (monitors, keyboard, keybindings, apps, dock, lock timings, etc.).
 
 Follow the steps in order, verify each one and tell the user if anything fails. Do not invent design changes: everything you need is in the repo.
 
@@ -57,8 +57,8 @@ omarchy pkg add cava
 ### 2. Clone the repo
 
 ```bash
-repo=$(mktemp -d)/omarchy-config
-git clone --depth 1 https://github.com/BrunoAguinaga0/omarchy-config.git "$repo"
+repo=$(mktemp -d)/omarchy-afterglow
+git clone --depth 1 https://github.com/BrunoAguinaga0/omarchy-afterglow.git "$repo"
 ```
 
 ### 3. Plugins

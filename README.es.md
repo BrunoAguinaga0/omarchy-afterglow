@@ -1,10 +1,10 @@
-# Omarchy en islas
+# Omarchy Afterglow
 
 *[Read in English](README.md)*
 
-Un diseño para [Omarchy](https://omarchy.org) con la barra partida en islas de vidrio, un reproductor que toma los colores de la portada, un bloqueo que late con la música, y un menú y unos avisos redibujados. Todo sigue los colores del tema que tengas puesto (en las capturas, Ristretto).
+Un escritorio para [Omarchy](https://omarchy.org) que se tiñe y late con lo que estás escuchando. La portada del disco colorea la barra, el halo pulsa con los graves, el bloqueo se enmarca en un aura y el protector de pantalla es la portada. Alrededor, una barra en islas de vidrio, un menú, paneles y avisos redibujados, y todo sigue los colores de tu tema (en las capturas, Ristretto).
 
-![Escritorio con la barra en islas](docs/screenshots/desktop.webp)
+![Escritorio Omarchy Afterglow](docs/screenshots/desktop.webp)
 
 Recorrido completo, parte por parte: [`docs/index.html`](docs/index.html) (descargalo y abrilo en el navegador; tiene botón ES / EN).
 
@@ -27,6 +27,16 @@ Al pasar el mouse se abre el menú con la portada y los controles. El halo, el b
 Red, Bluetooth, no molestar, luz nocturna, micrófono, luces de música, volumen y micrófono.
 
 <img src="docs/screenshots/control-crop.webp" width="400" alt="Centro de control">
+
+### Paneles de la barra
+
+Los íconos de la isla derecha abren los paneles de Omarchy con el mismo vidrio que las islas, con los interruptores y la opción elegida en el color de acento.
+
+| Audio | Red | Rendimiento |
+|---|---|---|
+| ![Panel de audio](docs/screenshots/panel-audio.webp) | ![Panel de red](docs/screenshots/panel-network.webp) | ![Panel de rendimiento](docs/screenshots/panel-performance.webp) |
+| **Bluetooth** | **Pantalla** | **Clima** |
+| ![Panel de Bluetooth](docs/screenshots/panel-bluetooth.webp) | ![Panel de pantalla](docs/screenshots/panel-monitor.webp) | ![Panel del clima](docs/screenshots/panel-weather.webp) |
 
 ### Menú de Super + Espacio
 
@@ -90,6 +100,10 @@ La forma más simple es pedirle a una IA con acceso a tu terminal (Claude Code, 
 | Arranque y cursor | `config/omarchy/plymouth/` | propio |
 | Vidrio, esquinas, protector de terminal apagado | `state/toggles/` | interruptores de Omarchy |
 
+## Licencia
+
+MIT, ver [`LICENSE`](LICENSE). Hay partes que vienen de Omarchy, omarchy-better-lock y omarchy-performance, también MIT; ver [`NOTICE.md`](NOTICE.md).
+
 ## Para mi propia compu
 
 `sync.sh` y `restore.sh` son para mantener **mi** instalación completa, con mis preferencias personales incluidas. Si querés usar el diseño, seguí [`INSTRUCCIONES-IA.md`](INSTRUCCIONES-IA.md).
@@ -105,8 +119,8 @@ git commit -am "..." && git push
 Restaurar en otra compu mía:
 
 ```bash
-gh repo clone BrunoAguinaga0/omarchy-config
-cd omarchy-config
+gh repo clone BrunoAguinaga0/omarchy-afterglow
+cd omarchy-afterglow
 omarchy pkg add cava
 ./restore.sh
 ```

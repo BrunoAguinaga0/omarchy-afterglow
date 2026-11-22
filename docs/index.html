@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Omarchy en islas</title>
+<title>Omarchy Afterglow</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,6 +121,10 @@
 
   .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 
+  .panels { columns: 3 240px; column-gap: 14px; }
+  .panels figure { margin: 0 0 14px; break-inside: avoid; display: grid; gap: 6px; }
+  .panels figcaption { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
   .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
   .sw { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--island-2); }
   .sw i { display: block; height: 44px; }
@@ -166,7 +170,7 @@
 <div class="wrap">
 
   <div class="topbar">
-    <span class="pill"><b>omarchy-config</b><span class="es">diseño visual</span><span class="en">visual design</span></span>
+    <span class="pill"><b>omarchy-afterglow</b><span class="es">diseño visual</span><span class="en">visual design</span></span>
     <div class="right">
       <span class="pill">
         <span class="dots" aria-hidden="true">
@@ -182,9 +186,9 @@
   </div>
 
   <header class="hero">
-    <h1><span class="es">Omarchy <span>en islas</span></span><span class="en">Omarchy <span>in islands</span></span></h1>
-    <p class="lead es">Un diseño para Omarchy con la barra partida en islas de vidrio, un reproductor que toma los colores de la portada, un bloqueo que late con la música, y un menú y unos avisos redibujados. Todo sigue los colores del tema que tengas puesto.</p>
-    <p class="lead en">A design for Omarchy with the bar split into glass islands, a player that takes its colors from the album cover, a lock screen that pulses with the music, and a redrawn menu and on-screen notices. Everything follows the colors of whatever theme you have on.</p>
+    <h1>Omarchy <span>Afterglow</span></h1>
+    <p class="lead es">Un escritorio para Omarchy que se tiñe y late con lo que estás escuchando. La portada del disco colorea la barra, el halo pulsa con los graves, el bloqueo se enmarca en un aura y el protector de pantalla es la portada. Alrededor, una barra en islas de vidrio, un menú y unos avisos redibujados, y todo sigue los colores de tu tema.</p>
+    <p class="lead en">An Omarchy desktop that takes on the color and the beat of whatever you are listening to. The album cover tints the bar, the glow pulses with the bass, the lock screen is framed in an aura and the screensaver is the cover itself. Around it: a bar of glass islands, a redrawn menu and on-screen notices, all following your theme's colors.</p>
     <img class="shot" src="screenshots/desktop.webp" width="1366" height="768"
       data-alt-es="Escritorio vacío con el fondo de la luna industrial y la barra en tres islas arriba: escritorios a la izquierda, reproductor en el centro y estado a la derecha."
       data-alt-en="Empty desktop with the industrial moon wallpaper and the bar in three islands at the top: workspaces on the left, player in the middle and status on the right."
@@ -202,6 +206,7 @@
     <a href="#barra"><span class="es">Barra</span><span class="en">Bar</span></a>
     <a href="#musica"><span class="es">Reproductor</span><span class="en">Player</span></a>
     <a href="#control"><span class="es">Centro de control</span><span class="en">Control center</span></a>
+    <a href="#paneles"><span class="es">Paneles</span><span class="en">Panels</span></a>
     <a href="#menu"><span class="es">Menú</span><span class="en">Menu</span></a>
     <a href="#avisos"><span class="es">Avisos</span><span class="en">OSD</span></a>
     <a href="#bloqueo"><span class="es">Bloqueo</span><span class="en">Lock screen</span></a>
@@ -304,6 +309,66 @@
           data-alt-en="Control center: six buttons in two columns (Network, Bluetooth, Do not disturb, Night light, Microphone, Music lights), volume and microphone sliders at 100% and shortcuts to Audio and Display."
           alt="Centro de control.">
       </div>
+    </div>
+  </section>
+
+  <!-- Paneles -->
+  <section class="island" id="paneles">
+    <div class="island-head">
+      <h2><span class="es">Paneles de la barra</span><span class="en">Bar panels</span></h2>
+      <span class="eyebrow"><span class="es">vidrio · acento en lo elegido</span><span class="en">glass · accent on the chosen option</span></span>
+    </div>
+    <div class="body">
+      <p class="es">Los íconos de la isla derecha abren los paneles de Omarchy con el mismo vidrio que las islas: fondo desenfocado al 78 %, borde finito y esquinas de 18 px. Los interruptores encendidos, la salida de audio activa y la opción elegida se marcan con el color de acento, como en el menú.</p>
+      <p class="en">The icons in the right island open Omarchy's panels in the same glass as the islands: a 78% blurred background, a thin border and 18 px corners. Switches that are on, the active audio output and the chosen option are marked in the accent color, as in the menu.</p>
+    </div>
+    <div class="panels">
+      <figure>
+        <img class="shot" src="screenshots/panel-audio.webp" width="412" height="470"
+          data-alt-es="Panel de audio: interruptor encendido en coral, volumen de salida y entrada, la salida activa resaltada en coral y Spotify como fuente con su propio volumen."
+          data-alt-en="Audio panel: switch on in coral, output and input volume, the active output highlighted in coral and Spotify as a source with its own volume."
+          alt="Panel de audio.">
+        <figcaption><span class="es">Audio</span><span class="en">Audio</span></figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="screenshots/panel-network.webp" width="408" height="248"
+          data-alt-es="Panel de red: conexión por cable con ping, velocidad y datos transferidos, y botones de proveedor DNS con DHCP elegido."
+          data-alt-en="Network panel: wired connection with ping, speed and data transferred, and DNS provider buttons with DHCP chosen."
+          alt="Panel de red.">
+        <figcaption><span class="es">Red</span><span class="en">Network</span></figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="screenshots/panel-performance.webp" width="324" height="512"
+          data-alt-es="Panel de rendimiento: uso de CPU, memoria y GPU, temperaturas y ventilador en barras, y un botón para abrir btop."
+          data-alt-en="Performance panel: CPU, memory and GPU usage, temperatures and fan as bars, and a button to open btop."
+          alt="Panel de rendimiento.">
+        <figcaption><span class="es">Rendimiento</span><span class="en">Performance</span></figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="screenshots/panel-bluetooth.webp" width="404" height="176"
+          data-alt-es="Panel de Bluetooth: interruptor encendido en coral y un parlante emparejado."
+          data-alt-en="Bluetooth panel: switch on in coral and a paired speaker."
+          alt="Panel de Bluetooth.">
+        <figcaption>Bluetooth</figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="screenshots/panel-monitor.webp" width="408" height="268"
+          data-alt-es="Panel de pantalla: tamaño del texto en una barra por pasos y botones de escala 1x y 2x."
+          data-alt-en="Display panel: text size on a stepped slider and 1x and 2x scale buttons."
+          alt="Panel de pantalla.">
+        <figcaption><span class="es">Pantalla</span><span class="en">Display</span></figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="screenshots/panel-weather.webp" width="496" height="200"
+          data-alt-es="Panel del clima: 23 grados, sensación térmica, viento y humedad, y el pronóstico de los dos días siguientes."
+          data-alt-en="Weather panel: 23 degrees, feels-like, wind and humidity, and the forecast for the next two days."
+          alt="Panel del clima.">
+        <figcaption><span class="es">Clima</span><span class="en">Weather</span></figcaption>
+      </figure>
+    </div>
+    <div class="files">
+      <div class="row"><span class="k">config</span><code>omarchy/shell.toml</code><span class="es">secciones <code>[popups]</code> y <code>[controls]</code>, las escribe el hook de colores</span><span class="en"><code>[popups]</code> and <code>[controls]</code> sections, written by the color hook</span></div>
+      <div class="row"><span class="k"><span class="es">plugins</span><span class="en">plugins</span></span><span class="es">los de Omarchy, sin copiar: el estilo sobrevive a las actualizaciones</span><span class="en">Omarchy's own, not cloned: the look survives updates</span></div>
     </div>
   </section>
 
@@ -515,9 +580,9 @@
       <p class="es">El repo trae una guía paso a paso pensada para que la siga una IA con acceso a tu terminal. Aplica solo lo visual y deja como están tus monitores, atajos, dock y tiempos de bloqueo. Cada archivo que reemplaza queda guardado como <code>.bak</code>.</p>
       <p class="en">The repo includes a step-by-step guide meant to be followed by an AI assistant with access to your terminal. It applies only the visual parts and leaves your monitors, keybindings, dock and lock timings alone. Every file it replaces is backed up as <code>.bak</code>.</p>
       <pre class="es"><span class="c"># pedile a tu asistente que siga esta guía:</span>
-https://github.com/BrunoAguinaga0/omarchy-config/blob/main/INSTRUCCIONES-IA.md</pre>
+https://github.com/BrunoAguinaga0/omarchy-afterglow/blob/main/INSTRUCCIONES-IA.md</pre>
       <pre class="en"><span class="c"># ask your assistant to follow this guide:</span>
-https://github.com/BrunoAguinaga0/omarchy-config/blob/main/INSTRUCTIONS-AI.md</pre>
+https://github.com/BrunoAguinaga0/omarchy-afterglow/blob/main/INSTRUCTIONS-AI.md</pre>
       <p class="es"><strong>Necesitás:</strong> Omarchy 4.5 con Hyprland, <code>cava</code>, las fuentes Adwaita Mono y JetBrains Mono Nerd, y <code>sudo</code> para el arranque y el cursor.</p>
       <p class="en"><strong>You need:</strong> Omarchy 4.5 with Hyprland, <code>cava</code>, the Adwaita Mono and JetBrains Mono Nerd fonts, and <code>sudo</code> for the boot screen and cursor.</p>
       <p class="note es">Las copias de los plugins de Omarchy (<code>bruno.bar</code>, <code>bruno.clock</code>, <code>bruno.menu</code>, <code>bruno.osd</code>, <code>bruno.workspaces</code>) salen de la versión 4.5.0. Con una versión mucho más nueva, alguna puede no cargar.</p>
@@ -528,14 +593,14 @@ https://github.com/BrunoAguinaga0/omarchy-config/blob/main/INSTRUCTIONS-AI.md</p
   <footer>
     <p class="es">Bloqueo basado en <a href="https://github.com/BibekBhusal0/omarchy-better-lock">omarchy-better-lock</a> de Bibek Bhusal (MIT). Rendimiento: <a href="https://github.com/SkyHonnor/omarchy-performance">omarchy-performance</a> de SkyHonnor (MIT). Fondo y tema Ristretto: Omarchy.</p>
     <p class="en">Lock screen based on <a href="https://github.com/BibekBhusal0/omarchy-better-lock">omarchy-better-lock</a> by Bibek Bhusal (MIT). Performance: <a href="https://github.com/SkyHonnor/omarchy-performance">omarchy-performance</a> by SkyHonnor (MIT). Wallpaper and Ristretto theme: Omarchy.</p>
-    <p><a href="https://github.com/BrunoAguinaga0/omarchy-config">github.com/BrunoAguinaga0/omarchy-config</a></p>
+    <p><a href="https://github.com/BrunoAguinaga0/omarchy-afterglow">github.com/BrunoAguinaga0/omarchy-afterglow</a></p>
   </footer>
 </div>
 
 <script>
   (function () {
     var root = document.documentElement;
-    var titles = { es: "Omarchy en islas", en: "Omarchy in islands" };
+    var titles = { es: "Omarchy Afterglow", en: "Omarchy Afterglow" };
     function apply(lang) {
       root.setAttribute("data-lang", lang);
       root.setAttribute("lang", lang);
