@@ -1391,6 +1391,11 @@ Item {
       return "ok";
     }
 
+    function quietNowPlaying(ms: int): string {
+      nowPlaying.quietUntil = Date.now() + Math.max(0, ms);
+      return "ok";
+    }
+
     function nowPlaying(): string {
       nowPlaying.announce();
       return nowPlaying.showing ? "shown" : "nothing-playing";

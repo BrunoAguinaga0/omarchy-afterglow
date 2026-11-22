@@ -137,9 +137,10 @@ Panel {
     height: Math.round(root.implicitHeight * 0.82)
     width: pillRow.implicitWidth + Style.space(18)
     radius: height / 2
-    color: Util.alpha(Commons.Color.accent, hover.hovered || root.opened ? 0.3 : 0.16)
+    // Neutral like the other islands; the accent is kept for what is active.
+    color: Util.alpha(root.fg, hover.hovered || root.opened ? 0.14 : 0.07)
     border.width: 1
-    border.color: Util.alpha(Commons.Color.accent, 0.55)
+    border.color: Util.alpha(root.fg, hover.hovered || root.opened ? 0.25 : 0.14)
     Behavior on color { ColorAnimation { duration: Style.duration(150) } }
 
     Row {

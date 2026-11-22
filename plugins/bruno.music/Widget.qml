@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.Mpris
+import Quickshell.Wayland
 import qs.Commons
 import qs.Commons as Commons
 import qs.Ui
@@ -62,22 +63,40 @@ Panel {
   implicitWidth: Math.round((pill.width + Style.space(4)) * reveal)
   implicitHeight: bar ? bar.barSize : Style.bar.sizeHorizontal
 
+  // On the island bar the pill becomes the center island itself: same height
+  // and corners as the other islands, and the island behind it is hidden.
+  readonly property bool fillIsland: bar ? bar.islands === true : false
+  readonly property bool yieldIsland: fillIsland && musicOn
+  function syncIsland() {
+    if (bar && typeof bar.setCenterIslandYielded === "function") bar.setCenterIslandYielded(yieldIsland)
+  }
+  onYieldIslandChanged: syncIsland()
+  onBarChanged: syncIsland()
+  Component.onDestruction: if (bar && typeof bar.setCenterIslandYielded === "function") bar.setCenterIslandYielded(false)
+
   Rectangle {
     id: pill
     anchors.verticalCenter: parent.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
-    height: Math.round(root.implicitHeight * 0.82)
-    width: row.implicitWidth + Style.space(14)
-    radius: height / 2
-    color: Util.alpha(root.tones[0], hover.hovered || root.opened ? 0.3 : 0.18)
-    border.width: 1
-    border.color: Util.alpha(root.tones[0], 0.6)
-    Behavior on color { ColorAnimation { duration: Style.duration(150) } }
+    height: root.fillIsland ? root.bar.islandHeight : Math.round(root.implicitHeight * 0.82)
+    width: row.implicitWidth + Style.space(root.fillIsland ? 20 : 14)
+    radius: root.fillIsland ? Math.min(height / 2, Style.cornerRadius) : height / 2
+    // Island glass underneath, tinted from the cover on top.
+    color: root.fillIsland ? root.bar.islandColor : "transparent"
+
+    Rectangle {
+      anchors.fill: parent
+      radius: parent.radius
+      color: Util.alpha(root.tones[0], hover.hovered || root.opened ? 0.3 : 0.18)
+      border.width: 1
+      border.color: Util.alpha(root.tones[0], 0.6)
+      Behavior on color { ColorAnimation { duration: Style.duration(150) } }
+    }
 
     Row {
       id: row
       anchors.verticalCenter: parent.verticalCenter
-      x: Style.space(3)
+      x: Style.space(root.fillIsland ? 5 : 3)
       spacing: Style.space(7)
 
       // Round cover thumbnail.
@@ -186,6 +205,7 @@ Panel {
       onClicked: function(mouse) {
         if (mouse.button === Qt.MiddleButton) { if (root.player) root.player.togglePlaying() }
         else if (mouse.button === Qt.RightButton) { if (root.player && root.player.canGoNext) root.player.next() }
+        else if (root.hoverOpen) root.hoverOpen = false
         else root.toggle()
       }
       onWheel: function(wheel) {
@@ -194,6 +214,35 @@ Panel {
         else if (wheel.angleDelta.y < 0 && root.player.canGoNext) root.player.next()
       }
     }
+  }
+
+  // Track changes made from the menu are not announced by the lock screen's
+  // "now playing" pill (bibek.lock).
+  function quietAnnounce() {
+    if (bar && typeof bar.run === "function") bar.run("omarchy-shell -q lock quietNowPlaying 5000")
+  }
+  function previous() { if (player && player.canGoPrevious) { quietAnnounce(); player.previous() } }
+  function next() { if (player && player.canGoNext) { quietAnnounce(); player.next() } }
+
+  // Hover: the menu opens while the pointer rests on the pill and closes once
+  // it has left both the pill and the menu. A click pins it open.
+  property bool hoverOpen: false
+  property bool cardHovered: false
+  readonly property bool pointerInside: hover.hovered || cardHovered
+  onOpenedChanged: if (!opened) hoverOpen = false
+  onPointerInsideChanged: {
+    if (pointerInside) { closeDelay.stop(); if (!opened && musicOn) openDelay.restart() }
+    else { openDelay.stop(); if (hoverOpen) closeDelay.restart() }
+  }
+  Timer {
+    id: openDelay
+    interval: 180
+    onTriggered: if (root.pointerInside && !root.opened && root.musicOn) { root.hoverOpen = true; root.open() }
+  }
+  Timer {
+    id: closeDelay
+    interval: 350
+    onTriggered: if (root.hoverOpen && !root.pointerInside) root.close()
   }
 
   KeyboardPanel {
@@ -205,18 +254,28 @@ Panel {
     focusTarget: panel.loadedContent
     contentWidth: Style.space(420)
     contentHeight: panel.fittedContentHeight(panel.loadedContentHeight)
+    // The music card is the whole menu: no frame or padding around it.
+    padding: 0
+    borderSpec: ({ color: "transparent", widths: { top: 0, right: 0, bottom: 0, left: 0 }, gradient: null })
+    // Opened by hover it must not steal the keyboard from the app in use.
+    WlrLayershell.keyboardFocus: panel.open && !root.hoverOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     content: PanelKeyCatcher {
       anchors.fill: parent
       implicitHeight: card.implicitHeight
       onMoveRequested: function(dx, dy) {
         if (!root.player) return
-        if (dx < 0 && root.player.canGoPrevious) root.player.previous()
-        else if (dx > 0 && root.player.canGoNext) root.player.next()
+        if (dx < 0) root.previous()
+        else if (dx > 0) root.next()
       }
       onActivateRequested: if (root.player) root.player.togglePlaying()
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
+
+      HoverHandler {
+        onHoveredChanged: root.cardHovered = hovered
+        Component.onDestruction: root.cardHovered = false
+      }
 
       MediaCard {
         id: card
@@ -224,9 +283,9 @@ Panel {
         height: implicitHeight
         player: root.player
         showStyleButton: false
-        onPreviousRequested: if (root.player && root.player.canGoPrevious) root.player.previous()
+        onPreviousRequested: root.previous()
         onPlayPauseRequested: if (root.player) root.player.togglePlaying()
-        onNextRequested: if (root.player && root.player.canGoNext) root.player.next()
+        onNextRequested: root.next()
       }
     }
   }

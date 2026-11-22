@@ -221,7 +221,14 @@ Item {
 
   Component {
     id: pluginBarApiComponent
-    PluginBarApi { }
+    // Island geometry for plugins that draw their own island (bruno.music).
+    PluginBarApi {
+      property bool islands: false
+      property int islandHeight: 0
+      property color islandColor: "transparent"
+      property var _setCenterIslandYielded: null
+      function setCenterIslandYielded(value) { if (_setCenterIslandYielded) _setCenterIslandYielded(value) }
+    }
   }
 
   function publicLayoutConfig() {
@@ -244,6 +251,10 @@ Item {
     api._centerHoverRevealSuppressed = Qt.binding(function() { return root.centerHoverRevealSuppressed })
     api.traySectionDragActive = Qt.binding(function() { return root.traySectionDragActive })
     api.traySectionPopoutOpen = Qt.binding(function() { return root.traySectionPopoutOpen })
+    api.islands = Qt.binding(function() { return root.islands })
+    api.islandHeight = Qt.binding(function() { return root.islandHeight })
+    api.islandColor = Qt.binding(function() { return root.islandColor })
+    api._setCenterIslandYielded = function(value) { root.centerIslandYielded = !!value }
     root.syncPluginBarApiObjects(api)
   }
 
@@ -769,6 +780,9 @@ Item {
   readonly property int islandHeight: root.barSize + Style.space(10)
   readonly property color islandColor: root.glassy ? Qt.rgba(root.background.r, root.background.g, root.background.b, Math.min(root.background.a, 0.55)) : root.background
   readonly property color islandBorder: Qt.rgba(root.barForeground.r, root.barForeground.g, root.barForeground.b, 0.1)
+  // Set by bruno.music while it plays: the pill takes the center island's
+  // place, so the island behind it is not drawn.
+  property bool centerIslandYielded: false
 
   function thicknessFor(screen) {
     if (root.vertical || !screen) return root.barSize
@@ -2364,7 +2378,7 @@ Item {
     Rectangle {
       readonly property real startX: beginList.width > 0 ? beginList.x : centerBox.x
       readonly property real endX: endList.width > 0 ? endList.x + endList.width : centerBox.x + centerBox.width
-      visible: root.islands && sections.active && endX - startX > 0
+      visible: root.islands && !root.centerIslandYielded && sections.active && endX - startX > 0
       x: startX - root.islandPad
       width: endX - startX + root.islandPad * 2
       height: root.islandHeight

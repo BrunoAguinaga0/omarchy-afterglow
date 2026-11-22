@@ -1,0 +1,22 @@
+[font]
+base-size = 12
+
+# ── Retoques (22/11/2026): menu and notifications in the bar islands' glass ──
+# Hex colors are Ristretto's; Hyprland blurs what is behind these layers.
+[menu]
+background-alpha          = 0.78
+border                    = "#e6d9db"
+border-alpha              = 0.12
+border-width              = 1
+scrim-alpha               = 0.4
+selected-background       = "#f38d70"
+selected-background-alpha = 0.14
+selected-border           = "#f38d70"
+selected-border-alpha     = 0.5
+selected-border-width     = 1
+
+[notifications]
+background-alpha = 0.72
+border           = "#e6d9db"
+border-alpha     = 0.12
+border-width     = 1

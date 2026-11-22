@@ -1,0 +1,30 @@
+// Compact fastfetch in the Ristretto palette: small Omarchy mark, one column,
+// bars for memory and disk, and the theme's colors at the bottom.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "~/.config/fastfetch/logo.txt",
+    "color": { "1": "38;2;243;141;112", "2": "38;2;191;64;98" },
+    "padding": { "top": 1, "left": 2, "right": 4 }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "38;2;114;105;106", "title": "38;2;243;141;112" },
+    "percent": { "type": ["bar", "num"], "color": { "green": "38;2;243;141;112", "yellow": "38;2;249;204;108", "red": "38;2;191;64;98" } },
+    "bar": { "width": 10, "char": { "elapsed": "■", "total": "·" } }
+  },
+  "modules": [
+    { "type": "title", "format": "{user-name}@{host-name}" },
+    { "type": "command", "key": "sistema   ", "text": "echo \"Omarchy $(omarchy-version)\"" },
+    { "type": "wm", "key": "escritorio", "format": "{pretty-name} {version}" },
+    { "type": "kernel", "key": "kernel    " },
+    { "type": "cpu", "key": "cpu       ", "format": "{name} @ {freq-max}" },
+    { "type": "gpu", "key": "gpu       ", "format": "{name}" },
+    { "type": "memory", "key": "memoria   " },
+    { "type": "disk", "key": "disco     ", "folders": "/", "format": "{size-percentage-bar} {size-used} / {size-total} ({size-percentage})" },
+    { "type": "uptime", "key": "encendida ", "format": "{?days}{days} d {?}{hours} h {minutes} min" },
+    "break",
+    { "type": "command", "key": " ", "text": "echo -e \"\\e[38;2;243;141;112m●\\e[38;2;191;64;98m●\\e[38;2;156;70;185m●\\e[38;2;60;166;195m●\\e[38;2;173;218;120m●\\e[38;2;249;204;108m●\\e[0m  \\e[38;2;114;105;106m$(omarchy-theme-current)\\e[0m\"" }
+  ]
+}

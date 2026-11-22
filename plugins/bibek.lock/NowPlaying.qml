@@ -12,6 +12,9 @@ PanelWindow {
   id: win
 
   property bool suppressed: false
+  // Until this time (ms since epoch) track changes are not announced; set over
+  // IPC by bruno.music when the track is changed from its own menu.
+  property double quietUntil: 0
   property int holdMs: 4000
 
   readonly property var players: Mpris.players ? Mpris.players.values : []
@@ -66,7 +69,7 @@ PanelWindow {
       if (!win.ready || win.trackKey === win.lastKey || win.title === "")
         return;
       win.lastKey = win.trackKey;
-      if (!win.suppressed)
+      if (!win.suppressed && Date.now() >= win.quietUntil)
         win.announce();
     }
   }

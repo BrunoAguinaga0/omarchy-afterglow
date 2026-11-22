@@ -19,7 +19,7 @@
       "centerEnd": [],
       "left": [
         {
-          "id": "omarchy.menu"
+          "id": "bruno.menu"
         },
         {
           "id": "bruno.workspaces"
@@ -84,11 +84,13 @@
   },
   "cloneSourceRestores": [
     "bibek.lock",
-    "bruno.osd"
+    "bruno.osd",
+    "bruno.menu"
   ],
   "disabledPlugins": [
     "omarchy.lock",
-    "omarchy.osd"
+    "omarchy.osd",
+    "omarchy.menu"
   ],
   "dock": {
     "pinned": [

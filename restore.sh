@@ -29,7 +29,8 @@ if [[ -d /opt/superwhisper/assets/omarchy-plugin/superwhisper-panel && ! -e $plu
 fi
 
 echo "→ Config"
-for f in omarchy/shell.json omarchy/lock.json hypr/hyprland.lua; do
+source ./files.sh
+for f in "${config_files[@]}"; do
   backup "$HOME/.config/$f"
   mkdir -p "$(dirname "$HOME/.config/$f")"
   cp "config/$f" "$HOME/.config/$f"
@@ -38,7 +39,9 @@ done
 echo "→ Toggles"
 backup "$state/toggles"
 mkdir -p "$state/toggles"
-rsync -a state/toggles/ "$state/toggles/"
+# Mirror the saved toggles exactly (a toggle turned off here is removed there
+# too); the previous folder is in the backup above.
+rsync -a --delete state/toggles/ "$state/toggles/"
 
 if [[ -f state/settings/weather.json ]]; then
   echo "→ Weather location"

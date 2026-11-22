@@ -7,21 +7,22 @@ cd "$(dirname "$0")"
 state="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy"
 
 # Shell plugins (without the original authors' .git folders).
-plugins=(bibek.lock skyhonnor.performance bruno.bar bruno.clock bruno.control bruno.music bruno.osd bruno.workspaces)
+plugins=(bibek.lock skyhonnor.performance bruno.bar bruno.clock bruno.control bruno.menu bruno.music bruno.osd bruno.workspaces)
 for p in "${plugins[@]}"; do
   mkdir -p "plugins/$p"
-  rsync -a --exclude .git "$HOME/.config/omarchy/plugins/$p/" "plugins/$p/"
+  rsync -a --delete --exclude .git "$HOME/.config/omarchy/plugins/$p/" "plugins/$p/"
 done
 
-# Config files.
-mkdir -p config/omarchy config/hypr
-cp "$HOME/.config/omarchy/shell.json" config/omarchy/shell.json
-cp "$HOME/.config/omarchy/lock.json" config/omarchy/lock.json
-cp "$HOME/.config/hypr/hyprland.lua" config/hypr/hyprland.lua
+# Config files, as paths under ~/.config (restore.sh reads the same list).
+source ./files.sh
+for f in "${config_files[@]}"; do
+  mkdir -p "config/$(dirname "$f")"
+  cp "$HOME/.config/$f" "config/$f"
+done
 
 # Omarchy toggles (glassy windows, no gaps, rounded corners, screensaver off...).
 mkdir -p state/toggles
-rsync -a "$state/toggles/" state/toggles/
+rsync -a --delete "$state/toggles/" state/toggles/
 
 # Theme name and the background picked inside it.
 omarchy theme current > state/theme
