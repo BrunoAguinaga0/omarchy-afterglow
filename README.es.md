@@ -18,7 +18,7 @@ Escritorios con una pastilla animada e íconos de las apps a la izquierda, el re
 
 ### Reproductor en la barra
 
-Al pasar el mouse se abre el menú con la portada y los controles. El halo, el borde y los botones toman los colores de la portada y laten con la música (`cava`).
+Al pasar el mouse se abre el menú con la portada y los controles. El halo, el borde y los botones toman los colores de la portada y laten con la música (`cava`). Con ventanas abiertas, un marco de luz con esos colores las rodea; en un escritorio vacío la pastilla crece y la luz corre por abajo y los costados de la pantalla.
 
 <img src="docs/screenshots/music-crop.webp" width="460" alt="Menú del reproductor">
 

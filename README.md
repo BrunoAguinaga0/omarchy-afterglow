@@ -20,7 +20,7 @@ Workspaces with an animated pill and app icons on the left, the clock or the pla
 
 ### Player in the bar
 
-Hovering opens a menu with the cover and controls. The glow, border and buttons take the cover's colors and pulse with the music (`cava`).
+Hovering opens a menu with the cover and controls. The glow, border and buttons take the cover's colors and pulse with the music (`cava`). With windows open, a frame of light in those colors surrounds them; on an empty desktop the pill grows and the light runs along the bottom and sides of the screen.
 
 <img src="docs/screenshots/music-crop.webp" width="460" alt="Player menu">
 

@@ -81,11 +81,12 @@ Panel {
     id: pillAura
     visible: root.lightsOn
     anchors.centerIn: pill
-    width: pill.width + Style.space(16)
-    height: pill.height + Style.space(11)
+    // Larger and brighter on an empty desktop.
+    width: pill.width + Style.space(16 + 14 * root.grow)
+    height: pill.height + Style.space(11 + 5 * root.grow)
     radius: height / 2
     // Follows the music's bass; steady when there is no audio feed.
-    opacity: root.audioLevel < 0 ? 0.75 : 0.35 + 0.65 * root.audioLevel
+    opacity: Math.min(1, (root.audioLevel < 0 ? 0.75 : 0.35 + 0.65 * root.audioLevel) * (1 + 0.3 * root.grow))
     Behavior on opacity { NumberAnimation { duration: 90 } }
     gradient: Gradient {
       orientation: Gradient.Horizontal
@@ -107,7 +108,7 @@ Panel {
     anchors.verticalCenter: parent.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
     height: root.fillIsland ? root.bar.islandHeight : Math.round(root.implicitHeight * 0.82)
-    width: row.implicitWidth + Style.space(root.fillIsland ? 20 : 14)
+    width: row.implicitWidth + Style.space((root.fillIsland ? 20 : 14) + 8 * root.grow)
     radius: root.fillIsland ? Math.min(height / 2, Style.cornerRadius) : height / 2
     // Island glass underneath, tinted from the cover on top.
     color: root.fillIsland ? root.bar.islandColor : "transparent"
@@ -117,7 +118,7 @@ Panel {
       anchors.fill: parent
       radius: parent.radius
       // The cover's colors run softly across the pill.
-      readonly property real strength: hover.hovered || root.opened ? 1.35 : 1
+      readonly property real strength: (hover.hovered || root.opened ? 1.35 : 1) + 0.3 * root.grow
       gradient: Gradient {
         orientation: Gradient.Horizontal
         GradientStop { position: 0.0; color: Util.alpha(root.tones[0], 0.30 * tint.strength) }
@@ -205,7 +206,8 @@ Panel {
       // Title that scrolls back and forth when it does not fit.
       Item {
         id: marquee
-        width: Math.min(Style.space(160), label.implicitWidth)
+        // Room for the whole title on an empty desktop.
+        width: Math.min(Style.space(160 + 140 * root.grow), label.implicitWidth)
         height: pill.height
         clip: true
         anchors.verticalCenter: parent.verticalCenter
@@ -218,16 +220,21 @@ Panel {
           text: root.label
           color: root.fg
           font.family: Style.font.family
-          font.pixelSize: Style.font.bodySmall
+          font.pixelSize: Math.round(Style.font.bodySmall + (Style.font.body - Style.font.bodySmall) * root.grow)
+          font.weight: root.grow > 0.5 ? Font.Medium : Font.Normal
           opacity: root.playing ? 1 : 0.65
 
-          SequentialAnimation on x {
+          // The scroll is a 0..1 share of the overflow, so a shorter title or
+          // a wider pill never leaves the text pushed out of view.
+          property real shift: 0
+          x: -marquee.overflow * shift
+          SequentialAnimation on shift {
             running: marquee.overflow > 0 && !Style.reduceMotion && root.hasMedia
             loops: Animation.Infinite
             PauseAnimation { duration: 1500 }
-            NumberAnimation { from: 0; to: -marquee.overflow; duration: marquee.overflow * 30; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 0; to: 1; duration: Math.max(400, marquee.overflow * 30); easing.type: Easing.InOutSine }
             PauseAnimation { duration: 1500 }
-            NumberAnimation { from: -marquee.overflow; to: 0; duration: marquee.overflow * 30; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 1; to: 0; duration: Math.max(400, marquee.overflow * 30); easing.type: Easing.InOutSine }
           }
         }
       }
@@ -480,32 +487,59 @@ Panel {
   property rect appsBlock: Qt.rect(0, 0, 0, 0)
   readonly property bool frameWanted: playing && !vertical && lightsOn
 
-  function refreshBlock() {
-    if (frameWanted && !blockQuery.running) blockQuery.running = true
+  // ── Empty desktop: the music takes the stage ──
+  // With no window on the active workspace, the pill grows and the light
+  // frame runs along the screen's bottom and sides (not the top, where the
+  // pill is).
+  property bool desktopEmpty: false
+  property rect workArea: Qt.rect(0, 0, 0, 0)
+  readonly property bool spotlight: desktopEmpty && musicOn && !vertical
+  property real grow: spotlight ? 1 : 0
+  Behavior on grow {
+    NumberAnimation { duration: Style.duration(260); easing.type: Easing.Bezier; easing.bezierCurve: Style.easeOut }
   }
+
+  readonly property bool queryWanted: musicOn && !vertical
+  function refreshBlock() {
+    if (queryWanted && !blockQuery.running) blockQuery.running = true
+  }
+  onQueryWantedChanged: refreshBlock()
   onFrameWantedChanged: refreshBlock()
 
   Process {
     id: blockQuery
-    command: ["sh", "-c", "hyprctl -j activeworkspace; echo '\u001e'; hyprctl -j clients"]
+    command: ["sh", "-c", "hyprctl -j activeworkspace; echo '\u001e'; hyprctl -j clients; echo '\u001e'; hyprctl -j monitors"]
     stdout: StdioCollector {
       onStreamFinished: {
         try {
           var parts = text.split("\u001e")
           var ws = JSON.parse(parts[0])
           var clients = JSON.parse(parts[1])
-          if (ws.hasfullscreen) { root.appsBlock = Qt.rect(0, 0, 0, 0); return }
-          var x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9, n = 0
+          var monitors = JSON.parse(parts[2])
+          // Usable area of the workspace's monitor: inside the bar and the outer gap.
+          for (var m = 0; m < monitors.length; m++) {
+            var mon = monitors[m]
+            if (mon.name !== ws.monitor) continue
+            var s = mon.scale || 1, r = mon.reserved || [0, 0, 0, 0], g = Style.gapsOut
+            root.workArea = Qt.rect(mon.x + r[0] + g, mon.y + r[1] + g,
+                                    mon.width / s - r[0] - r[2] - g * 2, mon.height / s - r[1] - r[3] - g * 2)
+          }
+          if (ws.hasfullscreen) { root.appsBlock = Qt.rect(0, 0, 0, 0); root.desktopEmpty = false; return }
+          var x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9, n = 0, all = 0
           for (var i = 0; i < clients.length; i++) {
             var c = clients[i]
-            if (!c.mapped || c.hidden || c.floating || c.workspace.id !== ws.id) continue
+            if (!c.mapped || c.hidden || c.workspace.id !== ws.id) continue
+            all++
+            if (c.floating) continue
             x1 = Math.min(x1, c.at[0]); y1 = Math.min(y1, c.at[1])
             x2 = Math.max(x2, c.at[0] + c.size[0]); y2 = Math.max(y2, c.at[1] + c.size[1])
             n++
           }
           root.appsBlock = n > 0 ? Qt.rect(x1, y1, x2 - x1, y2 - y1) : Qt.rect(0, 0, 0, 0)
+          root.desktopEmpty = all === 0
         } catch (e) {
           root.appsBlock = Qt.rect(0, 0, 0, 0)
+          root.desktopEmpty = false
         }
       }
     }
@@ -524,11 +558,16 @@ Panel {
   // Events arrive before the layout settles; ask a moment later. A slow poll
   // catches resizes, which Hyprland does not announce.
   Timer { id: blockRefresh; interval: 160; onTriggered: root.refreshBlock() }
-  Timer { interval: 1500; repeat: true; running: root.frameWanted; onTriggered: root.refreshBlock() }
+  Timer { interval: 1500; repeat: true; running: root.queryWanted; onTriggered: root.refreshBlock() }
+
+  // What the frame surrounds: the open apps, or the usable screen when the
+  // desktop is empty (then without its top wall).
+  readonly property bool frameOnScreen: appsBlock.width <= 0 && desktopEmpty
+  readonly property rect frameRect: appsBlock.width > 0 ? appsBlock : (desktopEmpty ? workArea : Qt.rect(0, 0, 0, 0))
 
   PanelWindow {
     id: frameLayer
-    readonly property bool on: root.frameWanted && root.appsBlock.width > 0
+    readonly property bool on: root.frameWanted && root.frameRect.width > 0
     property real shown: on ? 1 : 0
     Behavior on shown { NumberAnimation { duration: 600; easing.type: Easing.InOutQuad } }
 
@@ -546,10 +585,10 @@ Panel {
     Item {
       id: frameGlow
       readonly property int ring: Style.space(10)
-      x: root.appsBlock.x - ring
-      y: root.appsBlock.y - ring
-      width: root.appsBlock.width + ring * 2
-      height: root.appsBlock.height + ring * 2
+      x: root.frameRect.x - ring
+      y: root.frameRect.y - ring
+      width: root.frameRect.width + ring * 2
+      height: root.frameRect.height + ring * 2
       Behavior on x { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
       Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
       Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
@@ -570,7 +609,9 @@ Panel {
       Rectangle {
         x: 0; y: 0; width: parent.width; height: frameGlow.wall
         radius: height / 2
-        opacity: 0.3
+        // Off on an empty desktop: there the pill alone lights the top.
+        opacity: root.frameOnScreen ? 0 : 0.3
+        Behavior on opacity { NumberAnimation { duration: 220 } }
         gradient: Gradient {
           orientation: Gradient.Horizontal
           GradientStop { position: 0.0; color: root.tones[0] }
@@ -591,9 +632,10 @@ Panel {
       Rectangle {
         x: 0; y: frameGlow.wall / 2; width: frameGlow.wall; height: parent.height - frameGlow.wall
         radius: width / 2
+        // On an empty desktop the sides fade out completely towards the top.
         gradient: Gradient {
-          GradientStop { position: 0.0; color: Util.alpha(root.tones[0], 0.4) }
-          GradientStop { position: 0.35; color: root.tones[0] }
+          GradientStop { position: 0.0; color: Util.alpha(root.tones[0], root.frameOnScreen ? 0 : 0.4) }
+          GradientStop { position: root.frameOnScreen ? 0.5 : 0.35; color: root.tones[0] }
           GradientStop { position: 1.0; color: root.tones[0] }
         }
       }
@@ -601,8 +643,8 @@ Panel {
         x: parent.width - width; y: frameGlow.wall / 2; width: frameGlow.wall; height: parent.height - frameGlow.wall
         radius: width / 2
         gradient: Gradient {
-          GradientStop { position: 0.0; color: Util.alpha(root.tones[2], 0.4) }
-          GradientStop { position: 0.35; color: root.tones[2] }
+          GradientStop { position: 0.0; color: Util.alpha(root.tones[2], root.frameOnScreen ? 0 : 0.4) }
+          GradientStop { position: root.frameOnScreen ? 0.5 : 0.35; color: root.tones[2] }
           GradientStop { position: 1.0; color: root.tones[2] }
         }
       }
