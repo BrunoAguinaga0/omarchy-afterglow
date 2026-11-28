@@ -143,7 +143,9 @@ Item {
   BorderSurface {
     anchors.fill: parent
     color: "transparent"
-    borderSpec: Border.surfaceSpec("lock", "media-border", Util.alpha(card.accent, 0.7), 1, "border-alpha")
+    // Flat on purpose: surfaceSpec stringifies the colour (#AARRGGBB) and
+    // reads it back as #RRGGBBAA, which scrambles the cover tint.
+    borderSpec: Border.flat(Util.alpha(card.accent, 0.6), 1)
     radius: Style.cornerRadius
   }
 

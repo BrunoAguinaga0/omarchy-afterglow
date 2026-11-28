@@ -19,16 +19,18 @@ Item {
   width: 24
   height: 24
 
-  // Pads a palette to four colours with hue-shifted variations of its members.
+  // Pads a palette to four colours with lighter/darker variations of its
+  // members. The hue barely moves: shifting it (as before) turned a blue
+  // cover's extra tones violet and pink, which tinted the border and aura.
   function completePalette(colors) {
     var out = colors.slice(0, 4);
-    var shifts = [[0.07, 0.06], [-0.07, -0.04], [0.14, 0.1]];
+    var shifts = [[0.015, 0.12], [-0.015, -0.1], [0, 0.2]];
     var k = 0;
     while (out.length < 4) {
       var base = out[k % colors.length];
       var h = base.hslHue < 0 ? 0 : base.hslHue;
       var shift = shifts[k % shifts.length];
-      var l = Math.max(0.45, Math.min(0.75, base.hslLightness + shift[1]));
+      var l = Math.max(0.4, Math.min(0.8, base.hslLightness + shift[1]));
       out.push(Qt.hsla((h + shift[0] + 1) % 1, Math.max(0.4, base.hslSaturation), l, 1));
       k++;
     }
