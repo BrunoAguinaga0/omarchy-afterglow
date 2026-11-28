@@ -10,7 +10,7 @@ state="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy"
 plugins=(bibek.lock skyhonnor.performance bruno.bar bruno.clock bruno.control bruno.menu bruno.music bruno.osd bruno.workspaces)
 for p in "${plugins[@]}"; do
   mkdir -p "plugins/$p"
-  rsync -a --delete --exclude .git "$HOME/.config/omarchy/plugins/$p/" "plugins/$p/"
+  rsync -a --delete --exclude .git --exclude "*.bak.*" "$HOME/.config/omarchy/plugins/$p/" "plugins/$p/"
 done
 
 # Config files, as paths under ~/.config (restore.sh reads the same list).
