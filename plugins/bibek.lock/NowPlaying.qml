@@ -40,6 +40,16 @@ PanelWindow {
   property bool showing: false
   property bool ready: false
 
+  function isBrowser(p) {
+    var id = ((p.identity || "") + " " + (p.desktopEntry || "")).toLowerCase();
+    return /chrom|firefox|brave|vivaldi|opera|edge|zen|librewolf|floorp|qutebrowser|epiphany|web/.test(id);
+  }
+
+  // Browser media (reels, shorts, TikToks, videos) is never announced.
+  function worthAnnouncing(p) {
+    return !p || !isBrowser(p);
+  }
+
   function announce() {
     if (!player || title === "")
       return;
@@ -70,7 +80,9 @@ PanelWindow {
       if (!win.ready || win.trackKey === win.lastKey || win.title === "")
         return;
       win.lastKey = win.trackKey;
-      if (!win.suppressed && Date.now() >= win.quietUntil)
+      if (win.suppressed || Date.now() < win.quietUntil)
+        return;
+      if (win.worthAnnouncing(win.player))
         win.announce();
     }
   }
